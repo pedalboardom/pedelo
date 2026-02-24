@@ -1,0 +1,8 @@
+{
+  "buildCommand": "node scripts/fetch-pedals.js && npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
+}
