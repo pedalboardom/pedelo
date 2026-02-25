@@ -177,6 +177,12 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .sync-saving  .sync-txt { color:var(--accent); }
 .sync-error   .sync-txt { color:var(--red); }
 .sync-offline .sync-txt { color:var(--dim); }
+.reset-btn {
+  width:100%; padding:6px; background:transparent; border:1px solid var(--border);
+  border-radius:5px; color:var(--dim); font-family:var(--fc); font-size:10px;
+  letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all .15s; margin-top:4px;
+}
+.reset-btn:hover { border-color:var(--red); color:var(--red); }
 /* ── Main column ──────────────────────────────────────────────────────── */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
@@ -618,7 +624,7 @@ export default function App() {
       pair = pickMatchup(activePedals.map(enrich), recentIds.current);
     }
     if (pair) { setMatchup(pair); setWinner(null); }
-  }, [phase, activePedals, mode, battleLeft, battleRight]); // eslint-disable-line
+  }, [phase, activePedals]); // eslint-disable-line
 
   // ── Vote handler ──────────────────────────────────────────────────────────
   const handleVote = useCallback(
@@ -889,6 +895,9 @@ export default function App() {
               </div>
             </div>
             {initError && <div style={{ fontFamily: "var(--fc)", fontSize: 10, color: "var(--red)" }}>⚠ {initError}</div>}
+            {import.meta.env.VITE_ALLOW_RESET === "true" && (
+              <button className="reset-btn" onClick={handleReset}>↺ Reset all rankings</button>
+            )}
           </div>
         </aside>
 
