@@ -177,13 +177,6 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .sync-saving  .sync-txt { color:var(--accent); }
 .sync-error   .sync-txt { color:var(--red); }
 .sync-offline .sync-txt { color:var(--dim); }
-.reset-btn {
-  width:100%; padding:6px; background:transparent; border:1px solid var(--border);
-  border-radius:5px; color:var(--dim); font-family:var(--fc); font-size:10px;
-  letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all .15s;
-}
-.reset-btn:hover { border-color:var(--red); color:var(--red); }
-
 /* ── Main column ──────────────────────────────────────────────────────── */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
@@ -280,8 +273,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   flex-shrink:0; gap:12px;
 }
 .footer-txt { font-family:var(--fc); font-size:10px; color:var(--dim); letter-spacing:.5px; }
-.footer-txt a { color:var(--dim2); text-decoration:none; transition:color .15s; }
-.footer-txt a:hover { color:var(--accent); }
+.footer-txt a { color:var(--accent); text-decoration:underline; text-underline-offset:2px; transition:opacity .15s; }
+.footer-txt a:hover { opacity:.75; }
 
 /* ── Delta floaters ───────────────────────────────────────────────────── */
 .delta {
@@ -896,7 +889,6 @@ export default function App() {
               </div>
             </div>
             {initError && <div style={{ fontFamily: "var(--fc)", fontSize: 10, color: "var(--red)" }}>⚠ {initError}</div>}
-            <button className="reset-btn" onClick={handleReset}>↺ Reset all rankings</button>
           </div>
         </aside>
 
@@ -1021,7 +1013,7 @@ function LbRow({ pedal, rank }) {
     <div className="lb-row">
       <div className={`lb-rank ${cls}`}>{label}</div>
       {imgOk && pedal.image
-        ? <img className="lb-thumb" src={pedal.image} alt={pedal.name} onError={() => setImgOk(false)} />
+        ? <img className="lb-thumb" src={pedal.image} alt={pedal.name} referrerPolicy="no-referrer" loading="lazy" onError={() => setImgOk(false)} />
         : <div className="lb-thumb-ph">🎸</div>
       }
       <div className="lb-info">
@@ -1048,7 +1040,7 @@ function PedalCard({ pedal, stats, status, onClick }) {
       onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && status !== "loser") onClick(e); }}>
       <div className="img-wrap">
         {imgOk && pedal.image
-          ? <img className="pedal-img" src={pedal.image} alt={pedal.name} onError={() => setImgOk(false)} />
+          ? <img className="pedal-img" src={pedal.image} alt={pedal.name} referrerPolicy="no-referrer" loading="lazy" onError={() => setImgOk(false)} />
           : <div className="img-ph"><span>🎸</span>No image</div>
         }
       </div>
@@ -1572,6 +1564,6 @@ function ThumbImg({ pedal, size = 28 }) {
   const [ok, setOk] = useState(true);
   const s = { width: size, height: size, borderRadius: 4, objectFit: "contain", background: "var(--s2)", border: "1px solid var(--border)", padding: 1, flexShrink: 0 };
   return ok && pedal.image
-    ? <img style={s} src={pedal.image} alt={pedal.name} onError={() => setOk(false)} />
+    ? <img style={s} src={pedal.image} alt={pedal.name} referrerPolicy="no-referrer" loading="lazy" onError={() => setOk(false)} />
     : <div style={{ ...s, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.55 }}>🎸</div>;
 }
