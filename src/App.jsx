@@ -510,114 +510,119 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
 /* Scrollbar global */
 * { scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+
+/* ── Mobile-only elements: hidden by default; media query below overrides ── */
+/* IMPORTANT: these must appear BEFORE the @media block so the media query wins */
+.mobile-nav { display:none; }
+.mobile-sheet-content { display:none; }
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE LAYOUT  (≤ 767px)
-   Strategy: arena is full screen; sidebar becomes a slide-up sheet with a
-   peek strip at top so tapping it snaps back to voting; bottom nav always
-   visible; desktop layout completely unchanged above 768px.
+   Strategy: arena fills the screen; sidebar becomes a slide-up sheet;
+   bottom nav always visible; desktop layout unchanged above 768px.
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
 
   body { overflow:hidden; }
 
-  /* Shell: stack vertically, main behind, sheet on top */
   .app { flex-direction:column; position:relative; }
 
-  /* ── Sidebar becomes a bottom sheet ─────────────────────────────────── */
+  /* ── Sidebar → bottom sheet ──────────────────────────────────────────── */
   .sidebar {
     position:fixed; left:0; right:0; bottom:0;
     width:100%; min-width:unset;
-    /* default: peeked state — just the peek handle visible */
-    height:calc(100dvh - 56px); /* 56px = bottom nav height */
-    transform:translateY(calc(100% - 0px));
+    height:calc(100dvh - 56px);
+    transform:translateY(100%);
     transition:transform .32s cubic-bezier(.4,0,.2,1);
-    border-right:none;
-    border-top:1px solid var(--border);
-    border-radius:16px 16px 0 0;
-    z-index:200;
-    /* When a non-vote tab is active, sheet slides up */
+    border-right:none; border-top:1px solid var(--border);
+    border-radius:16px 16px 0 0; z-index:200;
   }
-  .sidebar.sheet-open {
-    transform:translateY(0);
-  }
+  .sidebar.sheet-open { transform:translateY(0); }
 
-  /* Hide the sb-top logo on mobile (we have the bottom nav) */
-  .sb-top { display:none; }
+  .sb-top  { display:none; }
+  .sb-tabs { display:none; }
 
-  /* Compact the mode section on mobile */
-  .mode-section { padding:8px 12px 6px; }
-
-  /* Make brand scroll taller on mobile since it has more space */
-  .brand-scroll { max-height:200px; }
-
-  /* ── Peek strip at top of sheet ─────────────────────────────────────── */
+  /* ── Peek/drag handle ────────────────────────────────────────────────── */
   .sheet-peek {
     display:flex; align-items:center; justify-content:center;
     padding:10px 0 6px; cursor:pointer; flex-shrink:0;
   }
-  .sheet-handle {
-    width:36px; height:4px; border-radius:2px; background:var(--border);
+  .sheet-handle { width:36px; height:4px; border-radius:2px; background:var(--dim2); }
+
+  /* ── Sheet content (About / Analysis) ───────────────────────────────── */
+  .mobile-sheet-content {
+    flex:1; overflow-y:auto; display:flex; flex-direction:column;
+  }
+  .mobile-sheet-content .analysis-area,
+  .mobile-sheet-content .about-area {
+    padding-bottom:16px;
   }
 
-  /* ── Main area fills screen above bottom nav ─────────────────────────── */
-  .main {
-    flex:1; height:calc(100dvh - 56px); overflow:hidden;
-  }
+  /* Mode section: compact; hidden when irrelevant tab is open */
+  .mode-section { padding:8px 12px 6px; }
+  .mode-section-hidden { display:none; }
 
-  /* Shrink the main header on mobile */
+  .brand-scroll { max-height:180px; }
+
+  /* ── Main area ───────────────────────────────────────────────────────── */
+  .main { flex:1; height:calc(100dvh - 56px); overflow:hidden; }
   .main-header { padding:10px 14px 8px; }
-  .main-title { font-size:22px; letter-spacing:2px; }
+  .main-title  { font-size:22px; letter-spacing:2px; }
 
-  /* ── Voting arena: stack cards vertically on mobile ─────────────────── */
+  /* ── Voting arena: side-by-side cards ───────────────────────────────── */
   .arena {
-    flex-direction:column;
-    padding:10px 12px;
+    flex-direction:row;
+    padding:10px 6px 4px;
     gap:0;
-    overflow-y:auto;
+    overflow:hidden;
     align-items:stretch;
     justify-content:flex-start;
   }
 
-  .card-col { max-width:100%; width:100%; }
+  .card-col { flex:1; min-width:0; max-width:none; width:auto; }
 
   .pedal-card {
-    padding:14px 14px 12px;
-    flex-direction:row;
-    gap:12px;
+    flex-direction:column;
     align-items:center;
+    padding:12px 8px 10px;
+    gap:8px;
     border-radius:12px;
+    height:100%;
   }
 
-  /* Smaller image on mobile */
-  .img-wrap { width:80px; height:80px; flex-shrink:0; border-radius:8px; }
-  .pedal-img { max-width:72px; max-height:72px; }
+  /* Larger images in side-by-side layout */
+  .img-wrap  { width:120px; height:120px; flex-shrink:0; border-radius:8px; }
+  .pedal-img { max-width:108px; max-height:108px; }
   .img-ph span { font-size:28px; }
 
-  /* Left-align pedal meta on mobile */
-  .pedal-meta { text-align:left; }
-  .pedal-stats { justify-content:flex-start; }
-  .vote-hint { display:none; } /* hide the "Click to vote" pill on mobile — tap is obvious */
+  .pedal-meta   { text-align:center; }
+  .pedal-name   { font-size:14px; }
+  .pedal-brand  { font-size:9px; letter-spacing:2px; }
+  .pedal-stats  { justify-content:center; gap:8px; }
+  .ps-v         { font-size:12px; }
+  .vote-hint    { display:none; }
 
-  /* VS divider: horizontal line on mobile */
-  .vs-wrap { flex-direction:row; padding:8px 0; gap:10px; }
-  .vs-line { width:100%; height:1px; flex:1; background:linear-gradient(to right,transparent,var(--border),transparent); }
-  .vs-text { font-size:18px; }
+  /* VS divider: vertical strip between the two cards */
+  .vs-wrap { flex-direction:column; padding:0 4px; width:30px; flex-shrink:0; }
+  .vs-line { width:1px; flex:1; height:auto; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
+  .vs-text { font-size:13px; }
 
-  /* Compact bottom bar */
-  .bottom-bar { padding:6px 14px; }
-  .k-note { font-size:10px; display:none; } /* hide K-factor note on mobile — too technical for small screen */
+  /* ── Bottom bar: centred "Skip matchup" button ───────────────────────── */
+  .bottom-bar { padding:6px 14px; justify-content:center; }
+  .k-note     { display:none; }
+  .skip-btn   {
+    width:100%; max-width:280px; padding:10px; font-size:12px;
+    letter-spacing:1.5px; border-radius:10px; text-align:center;
+  }
 
-  /* Hide the desktop footer on mobile */
+  /* Hide desktop footer on mobile */
   .footer { display:none; }
 
   /* ── Bottom navigation bar ───────────────────────────────────────────── */
   .mobile-nav {
     display:flex;
-    position:fixed; bottom:0; left:0; right:0;
-    height:56px;
-    background:var(--s1);
-    border-top:1px solid var(--border);
-    z-index:300;
+    position:fixed; bottom:0; left:0; right:0; height:56px;
+    background:var(--s1); border-top:1px solid var(--border); z-index:300;
   }
   .mobile-nav-btn {
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -627,28 +632,24 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
     -webkit-tap-highlight-color:transparent;
   }
   .mobile-nav-btn .nav-icon { font-size:18px; line-height:1; }
-  .mobile-nav-btn.active { color:var(--accent); }
+  .mobile-nav-btn.active    { color:var(--accent); }
 
-  /* sb-tabs: hide on mobile (navigation handled by bottom nav) */
-  .sb-tabs { display:none; }
-
-  /* Sidebar footer: compact on mobile */
   .sb-footer { padding:6px 12px; }
 
-  /* Sheet content panels (Analysis / About) — scrollable inside the sheet */
-  .mobile-sheet-content {
-    flex:1; overflow-y:auto; display:flex; flex-direction:column;
-  }
-  .mobile-sheet-content .analysis-area,
-  .mobile-sheet-content .about-scroll {
-    padding-bottom:80px; /* clear the bottom nav */
+  /* Narrow phones (< 360px): fall back to stacked cards */
+  @media (max-width: 359px) {
+    .arena       { flex-direction:column; padding:10px 10px 4px; }
+    .card-col    { max-width:100%; width:100%; }
+    .pedal-card  { flex-direction:row; gap:12px; padding:12px; height:auto; }
+    .img-wrap    { width:90px; height:90px; }
+    .pedal-img   { max-width:80px; max-height:80px; }
+    .pedal-meta  { text-align:left; }
+    .pedal-stats { justify-content:flex-start; }
+    .vs-wrap     { flex-direction:row; padding:6px 0; width:auto; }
+    .vs-line     { height:1px; width:100%; flex:1; background:linear-gradient(to right,transparent,var(--border),transparent); }
+    .vs-text     { font-size:14px; }
   }
 }
-
-/* Hide mobile nav on desktop */
-.mobile-nav { display:none; }
-/* Hide mobile sheet content panels on desktop (sidebar shows placeholder text instead) */
-.mobile-sheet-content { display:none; }
 `;
 
 // ─── App ──────────────────────────────────────────────────────────────────────
@@ -914,8 +915,8 @@ export default function App() {
             <button className={`sb-tab ${sidebarTab === "about"    ? "active" : ""}`} onClick={() => { setSidebarTab("about");    setMobileTab("about");    }}>About</button>
           </div>
 
-          {/* Mode selector */}
-          <div className="mode-section">
+          {/* Mode selector — hidden on mobile when viewing About or Analysis */}
+          <div className={`mode-section${(sidebarTab === "about" || sidebarTab === "analysis") ? " mode-section-hidden" : ""}`}>
             <div className="mode-label">Mode</div>
             <div className="mode-pills">
               {[["global","All Pedals"],["pool","Brand Pool"],["battle","Brand Battle"]].map(([m, lbl]) => (
@@ -1136,7 +1137,7 @@ export default function App() {
                   <b>{right ? getK((activeRankings[right.id] ?? {matches:0}).matches) : "—"}</b>
                   &nbsp;— higher = faster rating movement for new pedals
                 </div>
-                <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setPhase("voting"); }}>Skip →</button>
+                <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setPhase("voting"); }}>Skip matchup</button>
               </div>
             </>
           )}
