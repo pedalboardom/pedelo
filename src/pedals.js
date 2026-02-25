@@ -40,7 +40,7 @@ async function tryFetch(url) {
   // Log the first item so we can verify the real field structure in dev tools
   if (arr.length > 0) console.info("[pedals] Raw sample item:", JSON.stringify(arr[0]));
   const pedals = arr
-    .filter((p) => p && (p.name || p.filename || p.pedal_name || p.title))
+    .filter((p) => p && (p.name || p.Name || p.filename || p.Filename || p.pedal_name || p.title))
     .map(normalisePedal)
     .filter((p, i, self) => self.findIndex((q) => q.id === p.id) === i);
   if (pedals.length === 0) throw new Error("Empty list — field names may not match");
