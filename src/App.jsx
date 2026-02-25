@@ -510,6 +510,145 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
 /* Scrollbar global */
 * { scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE LAYOUT  (≤ 767px)
+   Strategy: arena is full screen; sidebar becomes a slide-up sheet with a
+   peek strip at top so tapping it snaps back to voting; bottom nav always
+   visible; desktop layout completely unchanged above 768px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+
+  body { overflow:hidden; }
+
+  /* Shell: stack vertically, main behind, sheet on top */
+  .app { flex-direction:column; position:relative; }
+
+  /* ── Sidebar becomes a bottom sheet ─────────────────────────────────── */
+  .sidebar {
+    position:fixed; left:0; right:0; bottom:0;
+    width:100%; min-width:unset;
+    /* default: peeked state — just the peek handle visible */
+    height:calc(100dvh - 56px); /* 56px = bottom nav height */
+    transform:translateY(calc(100% - 0px));
+    transition:transform .32s cubic-bezier(.4,0,.2,1);
+    border-right:none;
+    border-top:1px solid var(--border);
+    border-radius:16px 16px 0 0;
+    z-index:200;
+    /* When a non-vote tab is active, sheet slides up */
+  }
+  .sidebar.sheet-open {
+    transform:translateY(0);
+  }
+
+  /* Hide the sb-top logo on mobile (we have the bottom nav) */
+  .sb-top { display:none; }
+
+  /* Compact the mode section on mobile */
+  .mode-section { padding:8px 12px 6px; }
+
+  /* Make brand scroll taller on mobile since it has more space */
+  .brand-scroll { max-height:200px; }
+
+  /* ── Peek strip at top of sheet ─────────────────────────────────────── */
+  .sheet-peek {
+    display:flex; align-items:center; justify-content:center;
+    padding:10px 0 6px; cursor:pointer; flex-shrink:0;
+  }
+  .sheet-handle {
+    width:36px; height:4px; border-radius:2px; background:var(--border);
+  }
+
+  /* ── Main area fills screen above bottom nav ─────────────────────────── */
+  .main {
+    flex:1; height:calc(100dvh - 56px); overflow:hidden;
+  }
+
+  /* Shrink the main header on mobile */
+  .main-header { padding:10px 14px 8px; }
+  .main-title { font-size:22px; letter-spacing:2px; }
+
+  /* ── Voting arena: stack cards vertically on mobile ─────────────────── */
+  .arena {
+    flex-direction:column;
+    padding:10px 12px;
+    gap:0;
+    overflow-y:auto;
+    align-items:stretch;
+    justify-content:flex-start;
+  }
+
+  .card-col { max-width:100%; width:100%; }
+
+  .pedal-card {
+    padding:14px 14px 12px;
+    flex-direction:row;
+    gap:12px;
+    align-items:center;
+    border-radius:12px;
+  }
+
+  /* Smaller image on mobile */
+  .img-wrap { width:80px; height:80px; flex-shrink:0; border-radius:8px; }
+  .pedal-img { max-width:72px; max-height:72px; }
+  .img-ph span { font-size:28px; }
+
+  /* Left-align pedal meta on mobile */
+  .pedal-meta { text-align:left; }
+  .pedal-stats { justify-content:flex-start; }
+  .vote-hint { display:none; } /* hide the "Click to vote" pill on mobile — tap is obvious */
+
+  /* VS divider: horizontal line on mobile */
+  .vs-wrap { flex-direction:row; padding:8px 0; gap:10px; }
+  .vs-line { width:100%; height:1px; flex:1; background:linear-gradient(to right,transparent,var(--border),transparent); }
+  .vs-text { font-size:18px; }
+
+  /* Compact bottom bar */
+  .bottom-bar { padding:6px 14px; }
+  .k-note { font-size:10px; display:none; } /* hide K-factor note on mobile — too technical for small screen */
+
+  /* Hide the desktop footer on mobile */
+  .footer { display:none; }
+
+  /* ── Bottom navigation bar ───────────────────────────────────────────── */
+  .mobile-nav {
+    display:flex;
+    position:fixed; bottom:0; left:0; right:0;
+    height:56px;
+    background:var(--s1);
+    border-top:1px solid var(--border);
+    z-index:300;
+  }
+  .mobile-nav-btn {
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; cursor:pointer; background:transparent; border:none;
+    font-family:var(--fc); font-size:9px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--dim); transition:color .15s; padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav-btn .nav-icon { font-size:18px; line-height:1; }
+  .mobile-nav-btn.active { color:var(--accent); }
+
+  /* sb-tabs: hide on mobile (navigation handled by bottom nav) */
+  .sb-tabs { display:none; }
+
+  /* Sidebar footer: compact on mobile */
+  .sb-footer { padding:6px 12px; }
+
+  /* Sheet content panels (Analysis / About) — scrollable inside the sheet */
+  .mobile-sheet-content {
+    flex:1; overflow-y:auto; display:flex; flex-direction:column;
+  }
+  .mobile-sheet-content .analysis-area,
+  .mobile-sheet-content .about-scroll {
+    padding-bottom:80px; /* clear the bottom nav */
+  }
+}
+
+/* Hide mobile nav on desktop */
+.mobile-nav { display:none; }
+/* Hide mobile sheet content panels on desktop (sidebar shows placeholder text instead) */
+.mobile-sheet-content { display:none; }
 `;
 
 // ─── App ──────────────────────────────────────────────────────────────────────
@@ -524,6 +663,7 @@ export default function App() {
 
   // ── UI ────────────────────────────────────────────────────────────────────
   const [sidebarTab,  setSidebarTab]  = useState("rankings"); // rankings | analysis | about
+  const [mobileTab,   setMobileTab]   = useState("vote");     // vote | rankings | analysis | about
   const [mode,        setMode]        = useState("global");   // global | pool | battle
   const [poolBrands,  setPoolBrands]  = useState(new Set());  // empty = all brands
   const [battleLeft,  setBattleLeft]  = useState("");
@@ -756,16 +896,22 @@ export default function App() {
       <div className="app">
 
         {/* ── Sidebar ─────────────────────────────────────────────────── */}
-        <aside className="sidebar">
+        <aside className={`sidebar${mobileTab !== "vote" ? " sheet-open" : ""}`}>
+
+          {/* Peek strip — tap to go back to voting on mobile */}
+          <div className="sheet-peek" onClick={() => setMobileTab("vote")}>
+            <div className="sheet-handle" />
+          </div>
+
           <div className="sb-top">
             <div className="sb-logo">PEDAL Elo</div>
             <div className="sb-sub">Guitar Pedal Rankings</div>
           </div>
 
           <div className="sb-tabs">
-            <button className={`sb-tab ${sidebarTab === "rankings"  ? "active" : ""}`}  onClick={() => setSidebarTab("rankings")}>Rankings</button>
-            <button className={`sb-tab ${sidebarTab === "analysis" ? "active" : ""}`} onClick={() => setSidebarTab("analysis")}>Analysis</button>
-            <button className={`sb-tab ${sidebarTab === "about"    ? "active" : ""}`} onClick={() => setSidebarTab("about")}>About</button>
+            <button className={`sb-tab ${sidebarTab === "rankings"  ? "active" : ""}`}  onClick={() => { setSidebarTab("rankings");  setMobileTab("rankings");  }}>Rankings</button>
+            <button className={`sb-tab ${sidebarTab === "analysis" ? "active" : ""}`} onClick={() => { setSidebarTab("analysis"); setMobileTab("analysis"); }}>Analysis</button>
+            <button className={`sb-tab ${sidebarTab === "about"    ? "active" : ""}`} onClick={() => { setSidebarTab("about");    setMobileTab("about");    }}>About</button>
           </div>
 
           {/* Mode selector */}
@@ -869,21 +1015,24 @@ export default function App() {
             </>
           )}
 
-          {/* Analysis tab — sidebar is minimised, main area does the work */}
+          {/* Analysis tab — desktop: minimised sidebar, main area does the work */}
+          {/* Mobile: full content shown in the sheet */}
           {sidebarTab === "analysis" && (
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-              <div style={{ textAlign: "center", fontFamily: "var(--fc)", fontSize: 11, color: "var(--dim)", lineHeight: 1.7 }}>
-                Analysis is shown<br />in the main panel →
-              </div>
+            <div className="mobile-sheet-content">
+              <AnalysisPanel
+                pedals={pedals}
+                globalRankings={globalRankings}
+                history={history}
+                brands={brands}
+              />
             </div>
           )}
 
-          {/* About tab — sidebar is minimised, main area does the work */}
+          {/* About tab — desktop: minimised sidebar, main area does the work */}
+          {/* Mobile: full content shown in the sheet */}
           {sidebarTab === "about" && (
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-              <div style={{ textAlign: "center", fontFamily: "var(--fc)", fontSize: 11, color: "var(--dim)", lineHeight: 1.7 }}>
-                Methodology shown<br />in the main panel →
-              </div>
+            <div className="mobile-sheet-content">
+              <AboutPanel />
             </div>
           )}
 
@@ -934,7 +1083,7 @@ export default function App() {
                     <div className="empty-inner">
                       <div className="empty-icon">⚔</div>
                       <div className="empty-msg">Select two brands</div>
-                      <div className="empty-sub">Use the sidebar to pick Brand A and Brand B</div>
+                      <div className="empty-sub">Use the Rankings tab to pick Brand A and Brand B</div>
                     </div>
                   </div>
                 ) : activePedals.length < 2 ? (
@@ -1002,6 +1151,28 @@ export default function App() {
             </div>
           </footer>
         </main>
+
+        {/* ── Mobile bottom nav ───────────────────────────────────────── */}
+        <nav className="mobile-nav">
+          {[
+            { id: "vote",     icon: "⚔",  label: "Vote"     },
+            { id: "rankings", icon: "🏆",  label: "Rankings" },
+            { id: "analysis", icon: "📊",  label: "Analysis" },
+            { id: "about",    icon: "📖",  label: "About"    },
+          ].map(({ id, icon, label }) => (
+            <button
+              key={id}
+              className={`mobile-nav-btn${mobileTab === id ? " active" : ""}`}
+              onClick={() => {
+                setMobileTab(id);
+                if (id !== "vote") setSidebarTab(id === "rankings" ? "rankings" : id);
+              }}
+            >
+              <span className="nav-icon">{icon}</span>
+              {label}
+            </button>
+          ))}
+        </nav>
       </div>
 
       {deltas.map((d) => (
