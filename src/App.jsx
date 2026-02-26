@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   INITIAL_ELO, getK, calcElo,
-  pickMatchup, pickBattleMatchup, battleStorageKey,
+  pickMatchup,
 } from "./elo.js";
 import {
-  loadAll, loadBattleData,
-  saveGlobal, saveBattle, appendHistory, isConfigured,
+  loadAll,
+  saveGlobal, appendHistory, isConfigured,
 } from "./storage.js";
 import { fetchPedals } from "./pedals.js";
 
@@ -110,35 +110,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .brand-chip-name   { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .brand-chip-count  { font-size:9px; color:var(--dim); }
 
-/* Battle brand pickers */
-.battle-pickers  { display:flex; flex-direction:column; gap:6px; }
-.battle-vs-row   { display:flex; align-items:center; gap:6px; }
-.battle-vs-label { font-family:var(--fd); font-size:14px; color:var(--dim); flex-shrink:0; }
-.brand-select {
-  flex:1; background:var(--s2); border:1px solid var(--border); border-radius:5px;
-  color:var(--text); font-family:var(--fc); font-size:11px; padding:5px 7px;
-  cursor:pointer; transition:border-color .15s; appearance:none; min-width:0;
-}
-.brand-select:focus  { outline:none; border-color:var(--accent); }
-.brand-select option { background:var(--s2); }
 
-/* ── Battle explanation callout ────────────────────────────────────────── */
-.battle-explain {
-  margin:8px 12px; padding:10px 11px; border-radius:7px;
-  background:rgba(96,165,250,.07); border:1px solid rgba(96,165,250,.2);
-  font-family:var(--fc); font-size:11px; color:var(--text); line-height:1.5;
-  flex-shrink:0;
-}
-.battle-explain-title {
-  font-family:var(--fc); font-size:11px; font-weight:700; color:var(--blue);
-  text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;
-  display:flex; align-items:center; gap:6px;
-}
-.battle-explain b  { color:var(--blue); }
-.battle-explain-note {
-  margin-top:6px; padding-top:6px; border-top:1px solid rgba(96,165,250,.15);
-  font-size:10px; color:var(--dim2); font-style:italic;
-}
 
 /* ── Leaderboard ──────────────────────────────────────────────────────── */
 .lb-scroll { flex:1; overflow-y:auto; padding:4px 0; }
@@ -197,12 +169,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   border:1px solid var(--border); border-radius:20px; padding:2px 10px;
   letter-spacing:1px; text-transform:uppercase; margin-bottom:2px;
 }
-.battle-mode-badge {
-  font-family:var(--fc); font-size:11px; font-weight:700; color:var(--blue);
-  border:1px solid rgba(96,165,250,.3); border-radius:20px; padding:2px 10px;
-  letter-spacing:1px; text-transform:uppercase; margin-bottom:2px;
-  background:rgba(96,165,250,.07);
-}
+
 
 /* ── Voting arena ─────────────────────────────────────────────────────── */
 .arena {
@@ -554,8 +521,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
   /* On content tabs (About/Analysis), hide rankings-only controls */
   .sidebar.content-tab .mode-section,
-  .sidebar.content-tab .brand-section,
-  .sidebar.content-tab .battle-explain { display:none; }
+  .sidebar.content-tab .brand-section { display:none; }
 
   /* Hide desktop-only sidebar chrome */
   .sb-top  { display:none; }
@@ -710,7 +676,6 @@ export default function App() {
   // ── Data ──────────────────────────────────────────────────────────────────
   const [pedals,         setPedals]         = useState([]);
   const [globalRankings, setGlobalRankings] = useState({});
-  const [battleRankings, setBattleRankings] = useState({}); // { [battleKey]: { rankings, totalVotes } }
   const [history,        setHistory]        = useState([]);
   const [globalVotes,    setGlobalVotes]    = useState(0);
 
@@ -718,10 +683,8 @@ export default function App() {
   const [sidebarTab,  setSidebarTab]  = useState("rankings"); // rankings | analysis | about
   const [skipCount,   setSkipCount]   = useState(0);            // incremented to force new matchup
   const [mobileTab,   setMobileTab]   = useState("vote");     // vote | rankings | analysis | about
-  const [mode,        setMode]        = useState("global");   // global | pool | battle
+  const [mode,        setMode]        = useState("global");   // global | pool
   const [poolBrands,  setPoolBrands]  = useState(new Set());  // empty = all brands
-  const [battleLeft,  setBattleLeft]  = useState("");
-  const [battleRight, setBattleRight] = useState("");
 
   // ── Match state ───────────────────────────────────────────────────────────
   const [matchup,    setMatchup]    = useState(null);
@@ -760,26 +723,15 @@ export default function App() {
 
   // ── Active pool ───────────────────────────────────────────────────────────
 
-  const activeBattleKey = useMemo(() => {
-    if (mode === "battle" && battleLeft && battleRight && battleLeft !== battleRight)
-      return battleStorageKey(battleLeft, battleRight);
-    return null;
-  }, [mode, battleLeft, battleRight]);
-
   const activeRankings = useMemo(() => {
-    if (activeBattleKey) {
-      return battleRankings[activeBattleKey]?.rankings ?? {};
-    }
     return globalRankings;
-  }, [activeBattleKey, battleRankings, globalRankings]);
+  }, [globalRankings]);
 
   const activePedals = useMemo(() => {
     if (mode === "pool" && poolBrands.size > 0)
       return pedals.filter((p) => poolBrands.has(p.brand));
-    if (mode === "battle" && battleLeft && battleRight)
-      return pedals.filter((p) => p.brand === battleLeft || p.brand === battleRight);
     return pedals;
-  }, [mode, poolBrands, battleLeft, battleRight, pedals]);
+  }, [mode, poolBrands, pedals]);
 
   const brands = useMemo(() => {
     const map = {};
@@ -787,36 +739,13 @@ export default function App() {
     return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
   }, [pedals]);
 
-  // ── Load battle pool lazily when brand pair is set ─────────────────────────
-  useEffect(() => {
-    if (!activeBattleKey) return;
-    if (battleRankings[activeBattleKey]) return; // already loaded
-    loadBattleData(activeBattleKey).then((data) => {
-      // Seed with INITIAL_ELO for any pedal not yet in this battle's history
-      const blank = {};
-      activePedals.forEach((p) => { blank[p.id] = { elo: INITIAL_ELO, wins: 0, losses: 0, matches: 0 }; });
-      const merged = { ...blank, ...data.rankings };
-      setBattleRankings((prev) => ({
-        ...prev,
-        [activeBattleKey]: { rankings: merged, totalVotes: data.totalVotes ?? 0 },
-      }));
-    });
-  }, [activeBattleKey]); // eslint-disable-line
-
   // ── Pick matchup whenever voting starts or config changes ─────────────────
   useEffect(() => {
     if (phase !== "voting" || activePedals.length < 2) return;
 
     const enrich = (p) => ({ ...p, elo: (activeRankings[p.id] ?? { elo: INITIAL_ELO }).elo });
 
-    let pair = null;
-    if (mode === "battle" && battleLeft && battleRight) {
-      const poolA = activePedals.filter((p) => p.brand === battleLeft).map(enrich);
-      const poolB = activePedals.filter((p) => p.brand === battleRight).map(enrich);
-      pair = pickBattleMatchup(poolA, poolB, recentIds.current);
-    } else {
-      pair = pickMatchup(activePedals.map(enrich), recentIds.current);
-    }
+    const pair = pickMatchup(activePedals.map(enrich), recentIds.current);
     if (pair) { setMatchup(pair); setWinner(null); }
   }, [phase, activePedals, skipCount]); // eslint-disable-line
 
@@ -839,32 +768,19 @@ export default function App() {
 
       const record = {
         ts: Date.now(),
-        mode: activeBattleKey ? "battle" : "global",
-        battleKey: activeBattleKey ?? null,
-        battleBrands: activeBattleKey ? [battleLeft, battleRight] : null,
+        mode: "global",
         winner: { id: winnerPedal.id, name: winnerPedal.name, brand: winnerPedal.brand, eloBefore: wStats.elo, eloAfter: newWinnerElo },
         loser:  { id: loserPedal.id,  name: loserPedal.name,  brand: loserPedal.brand,  eloBefore: lStats.elo, eloAfter: newLoserElo  },
         delta, eloGap,
       };
 
       // Update state + persist
-      if (activeBattleKey) {
-        const prev = battleRankings[activeBattleKey] ?? { rankings: {}, totalVotes: 0 };
-        const newBR = {
-          rankings:   { ...prev.rankings, [winnerPedal.id]: newWStats, [loserPedal.id]: newLStats },
-          totalVotes: prev.totalVotes + 1,
-        };
-        setBattleRankings((b) => ({ ...b, [activeBattleKey]: newBR }));
-        setSyncStatus("saving");
-        saveBattle(activeBattleKey, newBR);
-      } else {
-        const newGR = { ...globalRankings, [winnerPedal.id]: newWStats, [loserPedal.id]: newLStats };
-        const newGV = globalVotes + 1;
-        setGlobalRankings(newGR);
-        setGlobalVotes(newGV);
-        setSyncStatus("saving");
-        saveGlobal({ rankings: newGR, totalVotes: newGV });
-      }
+      const newGR = { ...globalRankings, [winnerPedal.id]: newWStats, [loserPedal.id]: newLStats };
+      const newGV = globalVotes + 1;
+      setGlobalRankings(newGR);
+      setGlobalVotes(newGV);
+      setSyncStatus("saving");
+      saveGlobal({ rankings: newGR, totalVotes: newGV });
 
       // History
       const newHistory = appendHistory(record, history);
@@ -897,17 +813,16 @@ export default function App() {
 
       setTimeout(() => setPhase("voting"), 850);
     },
-    [phase, activeRankings, activeBattleKey, battleRankings, globalRankings, globalVotes, history, matchup, battleLeft, battleRight],
+    [phase, activeRankings, globalRankings, globalVotes, history, matchup],
   );
 
   // ── Reset ─────────────────────────────────────────────────────────────────
   const handleReset = () => {
-    if (!window.confirm("Reset ALL rankings (global + all battles)? This cannot be undone.")) return;
+    if (!window.confirm("Reset ALL rankings? This cannot be undone.")) return;
     const blank = {};
     pedals.forEach((p) => { blank[p.id] = { elo: INITIAL_ELO, wins: 0, losses: 0, matches: 0 }; });
     setGlobalRankings(blank);
     setGlobalVotes(0);
-    setBattleRankings({});
     setHistory([]);
     recentIds.current = new Set();
     saveGlobal({ rankings: blank, totalVotes: 0 });
@@ -916,19 +831,14 @@ export default function App() {
 
   // ── Leaderboard ───────────────────────────────────────────────────────────
   const leaderboard = useMemo(() => {
-    const r = activeBattleKey
-      ? (battleRankings[activeBattleKey]?.rankings ?? {})
-      : globalRankings;
     return activePedals
-      .map((p) => ({ ...p, ...(r[p.id] ?? { elo: INITIAL_ELO, wins: 0, losses: 0, matches: 0 }) }))
+      .map((p) => ({ ...p, ...(globalRankings[p.id] ?? { elo: INITIAL_ELO, wins: 0, losses: 0, matches: 0 }) }))
       .sort((a, b) => b.elo - a.elo);
-  }, [activePedals, activeBattleKey, battleRankings, globalRankings]);
+  }, [activePedals, globalRankings]);
 
-  const ranked   = leaderboard.filter((p) => p.matches > 0);
-  const unranked = leaderboard.filter((p) => p.matches === 0);
-  const totalVotes = activeBattleKey
-    ? (battleRankings[activeBattleKey]?.totalVotes ?? 0)
-    : globalVotes;
+  const ranked     = leaderboard.filter((p) => p.matches > 0);
+  const unranked   = leaderboard.filter((p) => p.matches === 0);
+  const totalVotes = globalVotes;
 
   // ── Render ────────────────────────────────────────────────────────────────
   if (phase === "loading") return (
@@ -942,8 +852,6 @@ export default function App() {
   );
 
   const [left, right] = matchup ?? [null, null];
-  const readyForBattle = mode === "battle" && battleLeft && battleRight && battleLeft !== battleRight;
-
   return (
     <>
       <style>{CSS}</style>
@@ -972,7 +880,7 @@ export default function App() {
           <div className="mode-section">
             <div className="mode-label">Mode</div>
             <div className="mode-pills">
-              {[["global","All Pedals"],["pool","Brand Pool"],["battle","Brand Battle"]].map(([m, lbl]) => (
+              {[["global","All Pedals"],["pool","Brand Pool"]].map(([m, lbl]) => (
                 <div key={m} className={`mode-pill ${mode === m ? "active" : ""}`} onClick={() => setMode(m)}>{lbl}</div>
               ))}
             </div>
@@ -982,7 +890,7 @@ export default function App() {
           {mode === "pool" && (
             <div className="brand-section">
               <div className="brand-label">
-                {poolBrands.size === 0 ? "All brands (tap to filter)" : `${poolBrands.size} brand${poolBrands.size > 1 ? "s" : ""} selected`}
+                {poolBrands.size === 0 ? "Filter by brand — votes count globally" : `${poolBrands.size} brand${poolBrands.size > 1 ? "s" : ""} selected · votes count globally`}
               </div>
               <div className="brand-scroll">
                 {brands.map(([brand, count]) => {
@@ -1007,37 +915,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Brand Battle pickers */}
-          {mode === "battle" && (
-            <>
-              <div className="brand-section">
-                <div className="brand-label">Pick two brands to battle</div>
-                <div className="battle-pickers">
-                  <div className="battle-vs-row">
-                    <select className="brand-select" value={battleLeft} onChange={(e) => { setBattleLeft(e.target.value); recentIds.current = new Set(); setPhase("voting"); }}>
-                      <option value="">— Brand A —</option>
-                      {brands.map(([b]) => <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
-                  <div className="battle-vs-row">
-                    <div className="battle-vs-label">VS</div>
-                    <select className="brand-select" value={battleRight} onChange={(e) => { setBattleRight(e.target.value); recentIds.current = new Set(); setPhase("voting"); }}>
-                      <option value="">— Brand B —</option>
-                      {brands.map(([b]) => b !== battleLeft && <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
 
-              <div className="battle-explain">
-                <div className="battle-explain-title">⚔ What is Brand Battle?</div>
-                Every matchup forces <b>one pedal from each brand</b> to go head-to-head — no internal fights within the same company.
-                <div className="battle-explain-note">
-                  The ratings earned here are kept in their own <b>separate scoreboard</b> and don't affect the main leaderboard. This keeps things fair: a Boss pedal can't boost its global rank just by fighting weaker MXR competition in a lopsided matchup.
-                </div>
-              </div>
-            </>
-          )}
 
           {/* Rankings tab content */}
           {sidebarTab === "rankings" && (
@@ -1051,20 +929,14 @@ export default function App() {
               <div className="lb-scroll">
                 {ranked.length > 0 && (
                   <>
-                    <div className="lb-head">
-                      {mode === "battle" && readyForBattle ? `${battleLeft} vs ${battleRight}` : "Leaderboard"}
-                    </div>
+                    <div className="lb-head">Leaderboard</div>
                     {ranked.map((p, i) => <LbRow key={p.id} pedal={p} rank={i} />)}
                   </>
                 )}
                 {unranked.length > 0 && (
                   <div className="lb-head" style={{ marginTop: 8 }}>Awaiting matchup — {unranked.length}</div>
                 )}
-                {mode === "battle" && !readyForBattle && (
-                  <div style={{ padding: "20px 14px", fontFamily: "var(--fc)", fontSize: 12, color: "var(--dim)", textAlign: "center" }}>
-                    Select two brands above to start a battle
-                  </div>
-                )}
+
               </div>
             </>
           )}
@@ -1112,11 +984,8 @@ export default function App() {
                : sidebarTab === "about"  ? <>HOW IT <em>WORKS</em></>
                : <>CHOOSE YOUR <em>WEAPON</em></>}
             </div>
-            {sidebarTab === "rankings" && mode !== "battle" && (
+            {sidebarTab === "rankings" && (
               <div className="round-pill">Round {totalVotes + 1}</div>
-            )}
-            {sidebarTab === "rankings" && mode === "battle" && readyForBattle && (
-              <div className="battle-mode-badge">⚔ Brand Battle</div>
             )}
           </div>
 
@@ -1132,15 +1001,7 @@ export default function App() {
           ) : (
             <>
               <div className="arena">
-                {mode === "battle" && !readyForBattle ? (
-                  <div className="empty-state">
-                    <div className="empty-inner">
-                      <div className="empty-icon">⚔</div>
-                      <div className="empty-msg">Select two brands</div>
-                      <div className="empty-sub">Use the Rankings tab to pick Brand A and Brand B</div>
-                    </div>
-                  </div>
-                ) : activePedals.length < 2 ? (
+                {activePedals.length < 2 ? (
                   <div className="empty-state">
                     <div className="empty-inner">
                       <div className="empty-icon">🎸</div>
@@ -1773,20 +1634,20 @@ function AboutPanel() {
 
         <div className="about-callout" style={{ marginTop: 14 }}>
           <div className="about-callout-title">Matchmaking</div>
-          Matchups aren't random. Pedals are sorted by rating and paired with opponents close in rank —
-          similar to how chess tournaments are seeded. A matchup between two pedals rated 1240 and 1260
-          is <b>more informative</b> than one between 1100 and 1400, because both outcomes are plausible.
-          Lopsided matchups produce very little rating movement regardless of who wins.
+          Matchups are never random. The algorithm always pairs pedals from <b>different brands</b> and
+          tries to anchor each matchup with at least one well-known pedal (50+ community votes) so
+          you almost always recognise at least one competitor. Within those constraints, pedals are
+          matched close in rating — similar to how chess tournaments are seeded — so both outcomes
+          are plausible and every vote moves the needle meaningfully.
         </div>
 
         <div className="about-callout" style={{ marginTop: 10, background: "rgba(96,165,250,.07)", borderColor: "rgba(96,165,250,.2)" }}>
-          <div className="about-callout-title" style={{ color: "var(--blue)" }}>Brand Battle — separate pools</div>
-          When you run a Brand Battle, those ratings are stored in a <b>completely separate pool</b> from
-          the global leaderboard. This is intentional: Elo ratings are only meaningful relative to the
-          pool they were earned in. A Boss pedal that racks up wins against weaker MXR competition in a
-          lopsided battle shouldn't be able to inflate its global rank. Battle pools answer the specific
-          question "who wins in a direct head-to-head between these two brands?" — a different question
-          from "which pedal is best overall?"
+          <div className="about-callout-title" style={{ color: "var(--blue)" }}>Brand Pool — focused voting, global impact</div>
+          With over 8,000 pedals in the database, most voters have only played a fraction of them.
+          Brand Pool lets you filter matchups to brands you actually know, so your votes reflect{" "}
+          <b>real experience rather than guesswork</b>. Those votes still count toward the global
+          leaderboard — focused expertise from people who know a brand well is exactly the signal
+          that makes the rankings meaningful.
         </div>
       </div>
 
