@@ -515,22 +515,34 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 /* IMPORTANT: these must appear BEFORE the @media block so the media query wins */
 .mobile-nav { display:none; }
 .mobile-sheet-content { display:none; }
+.mobile-footer { display:none; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE LAYOUT  (≤ 767px)
-   Strategy: arena fills the screen; sidebar becomes a slide-up sheet;
-   bottom nav always visible; desktop layout unchanged above 768px.
+
+   Layout zones (top → bottom, all in normal flow):
+     .main-header         flex-shrink:0
+     .arena               flex:1  (absorbs leftover space, cards DON'T stretch)
+     .bottom-bar          flex-shrink:0  (skip button)
+     .mobile-footer       flex-shrink:0  (credits line)
+     .mobile-nav          flex-shrink:0  56px
+
+   Sidebar becomes a fixed sheet anchored above .mobile-nav.
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
 
   body { overflow:hidden; }
 
-  .app { flex-direction:column; position:relative; }
+  /* ── App shell ─────────────────────────────────────────────────────── */
+  .app {
+    flex-direction:column;
+    height:100dvh;        /* use dvh for mobile address-bar safety */
+    position:relative;
+  }
 
-  /* ── Sidebar → bottom sheet ──────────────────────────────────────────── */
-  /* bottom:56px anchors the sheet above the in-flow nav */
+  /* ── Sidebar → slide-up sheet ──────────────────────────────────────── */
   .sidebar {
-    position:fixed; left:0; right:0; bottom:56px;
+    position:fixed; left:0; right:0; bottom:56px; /* sits above the nav */
     width:100%; min-width:unset;
     height:calc(100dvh - 56px);
     transform:translateY(100%);
@@ -540,22 +552,26 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   }
   .sidebar.sheet-open { transform:translateY(0); }
 
-  /* On content tabs (About/Analysis), hide rankings-only controls in the sheet */
+  /* On content tabs (About/Analysis), hide rankings-only controls */
   .sidebar.content-tab .mode-section,
   .sidebar.content-tab .brand-section,
   .sidebar.content-tab .battle-explain { display:none; }
 
+  /* Hide desktop-only sidebar chrome */
   .sb-top  { display:none; }
   .sb-tabs { display:none; }
 
-  /* ── Peek/drag handle ────────────────────────────────────────────────── */
+  /* Hide synced ribbon on mobile entirely */
+  .sb-footer { display:none; }
+
+  /* ── Peek/drag handle ──────────────────────────────────────────────── */
   .sheet-peek {
     display:flex; align-items:center; justify-content:center;
     padding:10px 0 6px; cursor:pointer; flex-shrink:0;
   }
   .sheet-handle { width:36px; height:4px; border-radius:2px; background:var(--dim2); }
 
-  /* ── Sheet content (About / Analysis) ───────────────────────────────── */
+  /* ── Sheet content (About / Analysis) ──────────────────────────────── */
   .mobile-sheet-content {
     flex:1; overflow-y:auto; display:flex; flex-direction:column;
   }
@@ -565,40 +581,49 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   }
 
   .mode-section { padding:8px 12px 6px; }
-
   .brand-scroll { max-height:180px; }
 
-  /* ── Main area ───────────────────────────────────────────────────────── */
-  .main { flex:1; overflow:hidden; min-height:0; }
-  .main-header { padding:10px 14px 8px; }
-  .main-title  { font-size:22px; letter-spacing:2px; }
-
-  /* ── Voting arena: side-by-side cards ───────────────────────────────── */
-  .arena {
-    flex-direction:row;
-    padding:8px 6px 6px;
-    gap:0;
+  /* ── Main column ───────────────────────────────────────────────────── */
+  .main {
+    flex:1;                /* fill between header and nav */
+    display:flex;
+    flex-direction:column;
     overflow:hidden;
-    align-items:stretch;
-    justify-content:flex-start;
-    min-height:0; /* critical: lets flex child shrink so bottom-bar stays on screen */
-    flex:1;
+    min-height:0;          /* allow flex shrink */
   }
 
-  .card-col { flex:1; min-width:0; max-width:none; width:auto; min-height:0; display:flex; flex-direction:column; }
+  .main-header { padding:10px 14px 8px; flex-shrink:0; }
+  .main-title  { font-size:22px; letter-spacing:2px; }
+
+  /* ── Voting arena: side-by-side cards ──────────────────────────────── */
+  .arena {
+    flex:1;               /* take remaining space between header & bottom-bar */
+    flex-direction:row;
+    align-items:flex-start; /* ← KEY: cards wrap content, don't stretch tall */
+    justify-content:center;
+    padding:8px 6px;
+    gap:0;
+    overflow:hidden;
+    min-height:0;
+  }
+
+  .card-col {
+    flex:1; min-width:0; max-width:none;
+    display:flex; flex-direction:column;
+    /* no flex:1 on children — card just wraps its content */
+  }
 
   .pedal-card {
     flex-direction:column;
     align-items:center;
-    padding:10px 8px 8px;
+    padding:10px 8px 10px;
     gap:6px;
     border-radius:12px;
-    flex:1;       /* fill card-col height */
-    min-height:0; /* don't overflow parent */
+    /* NO flex:1 — card is content-sized */
     overflow:hidden;
   }
 
-  /* Larger images in side-by-side layout */
+  /* Images */
   .img-wrap  { width:120px; height:120px; flex-shrink:0; border-radius:8px; }
   .pedal-img { max-width:108px; max-height:108px; }
   .img-ph span { font-size:28px; }
@@ -610,25 +635,45 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .ps-v         { font-size:13px; }
   .vote-hint    { display:none; }
 
-  /* VS divider: vertical strip between the two cards */
-  .vs-wrap { flex-direction:column; padding:0 4px; width:30px; flex-shrink:0; }
+  /* VS divider */
+  .vs-wrap { flex-direction:column; padding:0 4px; width:30px; flex-shrink:0; align-self:stretch; }
   .vs-line { width:1px; flex:1; height:auto; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
   .vs-text { font-size:13px; }
 
-  /* ── Bottom bar: centred "Skip matchup" button ───────────────────────── */
-  .bottom-bar { padding:6px 14px; justify-content:center; }
-  .k-note     { display:none; }
-  .skip-btn   {
+  /* ── Bottom bar: centred Skip button ───────────────────────────────── */
+  .bottom-bar {
+    flex-shrink:0;
+    padding:8px 14px;
+    justify-content:center;
+  }
+  .k-note { display:none; }
+  .skip-btn {
     width:100%; max-width:280px; padding:10px; font-size:12px;
     letter-spacing:1.5px; border-radius:10px; text-align:center;
   }
 
-  /* Hide desktop footer on mobile */
+  /* ── Desktop footer hidden ─────────────────────────────────────────── */
   .footer { display:none; }
 
-  /* ── Bottom navigation bar ───────────────────────────────────────────── */
-  /* In-flow nav: lives at the bottom of .app flex column.
-     .main gets flex:1 and naturally fills 100dvh minus these 56px. */
+  /* ── Mobile credits footer ─────────────────────────────────────────── */
+  .mobile-footer {
+    display:flex;
+    flex-shrink:0;
+    align-items:center;
+    justify-content:center;
+    padding:6px 14px;
+    border-top:1px solid var(--border);
+    background:var(--bg);
+  }
+  .mobile-footer-txt {
+    font-family:var(--fc); font-size:10px; color:var(--dim);
+    letter-spacing:.3px; text-align:center; line-height:1.4;
+  }
+  .mobile-footer-txt a {
+    color:var(--accent); text-decoration:none;
+  }
+
+  /* ── Bottom navigation bar ─────────────────────────────────────────── */
   .mobile-nav {
     display:flex;
     flex-shrink:0; height:56px; width:100%;
@@ -644,18 +689,16 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .mobile-nav-btn .nav-icon { font-size:18px; line-height:1; }
   .mobile-nav-btn.active    { color:var(--accent); }
 
-  .sb-footer { padding:6px 12px; }
-
-  /* Narrow phones (< 360px): fall back to stacked cards */
+  /* ── Narrow phones (< 360px): stacked cards ────────────────────────── */
   @media (max-width: 359px) {
-    .arena       { flex-direction:column; padding:10px 10px 4px; }
+    .arena       { flex-direction:column; padding:10px 10px 4px; align-items:stretch; }
     .card-col    { max-width:100%; width:100%; }
-    .pedal-card  { flex-direction:row; gap:12px; padding:12px; height:auto; }
+    .pedal-card  { flex-direction:row; gap:12px; padding:12px; }
     .img-wrap    { width:90px; height:90px; }
     .pedal-img   { max-width:80px; max-height:80px; }
     .pedal-meta  { text-align:left; }
     .pedal-stats { justify-content:flex-start; }
-    .vs-wrap     { flex-direction:row; padding:6px 0; width:auto; }
+    .vs-wrap     { flex-direction:row; padding:6px 0; width:auto; align-self:auto; }
     .vs-line     { height:1px; width:100%; flex:1; background:linear-gradient(to right,transparent,var(--border),transparent); }
     .vs-text     { font-size:14px; }
   }
@@ -1162,6 +1205,16 @@ export default function App() {
             </div>
           </footer>
         </main>
+
+        {/* ── Mobile credits footer ─────────────────────────────────── */}
+        <div className="mobile-footer">
+          <div className="mobile-footer-txt">
+            PedElo: Developed by{" "}
+            <a href="https://www.linkedin.com/in/jeremydabramson/" target="_blank" rel="noopener noreferrer">Jeremy Abramson</a>
+            , with data from{" "}
+            <a href="https://github.com/PedalPlayground/pedalplayground" target="_blank" rel="noopener noreferrer">PedalPlayground</a>
+          </div>
+        </div>
 
         {/* ── Mobile bottom nav ───────────────────────────────────────── */}
         <nav className="mobile-nav">
