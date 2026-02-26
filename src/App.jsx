@@ -716,6 +716,7 @@ export default function App() {
 
   // ── UI ────────────────────────────────────────────────────────────────────
   const [sidebarTab,  setSidebarTab]  = useState("rankings"); // rankings | analysis | about
+  const [skipCount,   setSkipCount]   = useState(0);            // incremented to force new matchup
   const [mobileTab,   setMobileTab]   = useState("vote");     // vote | rankings | analysis | about
   const [mode,        setMode]        = useState("global");   // global | pool | battle
   const [poolBrands,  setPoolBrands]  = useState(new Set());  // empty = all brands
@@ -817,7 +818,7 @@ export default function App() {
       pair = pickMatchup(activePedals.map(enrich), recentIds.current);
     }
     if (pair) { setMatchup(pair); setWinner(null); }
-  }, [phase, activePedals]); // eslint-disable-line
+  }, [phase, activePedals, skipCount]); // eslint-disable-line
 
   // ── Vote handler ──────────────────────────────────────────────────────────
   const handleVote = useCallback(
@@ -1189,7 +1190,7 @@ export default function App() {
                   <b>{right ? getK((activeRankings[right.id] ?? {matches:0}).matches) : "—"}</b>
                   &nbsp;— higher = faster rating movement for new pedals
                 </div>
-                <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setPhase("voting"); }}>Skip matchup</button>
+                <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setSkipCount((n) => n + 1); setPhase("voting"); }}>Skip matchup</button>
               </div>
             </>
           )}
@@ -1227,12 +1228,12 @@ export default function App() {
               key={id}
               className={`mobile-nav-btn${mobileTab === id ? " active" : ""}`}
               onClick={() => {
-                if (id === "vote") {
-                  // Always close sheet and show voting arena
+                if (id === "vote" || id === mobileTab) {
+                  // Vote tab OR tapping the already-active tab: retract sheet
                   setMobileTab("vote");
                   setSidebarTab("rankings");
                 } else {
-                  // Open sheet to this panel; update both so main content is correct
+                  // Open sheet to this panel
                   setMobileTab(id);
                   setSidebarTab(id);
                 }
@@ -1793,7 +1794,7 @@ function AboutPanel() {
       <div className="about-section" style={{ borderBottom: "none" }}>
         <div className="about-section-label">Credits</div>
         <div className="about-body">
-          Built by <b>Jeremy Abramson</b>. Pedal data and images from the{" "}
+          Built by <b><a href="https://www.linkedin.com/in/jeremydabramson/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>Jeremy Abramson</a></b>. Pedal data and images from the{" "}
           <a href="https://github.com/PedalPlayground/pedalplayground"
             target="_blank" rel="noopener noreferrer"
             style={{ color: "var(--accent)", textDecoration: "none" }}>
