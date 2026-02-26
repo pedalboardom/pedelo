@@ -418,7 +418,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .about-section:last-child { border-bottom:none; }
 
 .about-section-label {
-  font-family:var(--fc); font-size:9px; text-transform:uppercase;
+  font-family:var(--fc); font-size:11px; text-transform:uppercase;
   letter-spacing:3px; color:var(--accent); margin-bottom:8px;
 }
 
@@ -434,8 +434,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 }
 
 .about-body {
-  font-family:var(--fb); font-size:13px; color:var(--dim2);
-  line-height:1.7; max-width:660px;
+  font-family:var(--fb); font-size:15px; color:var(--dim2);
+  line-height:1.75; max-width:660px;
 }
 .about-body + .about-body { margin-top:10px; }
 .about-body b { color:var(--text); font-weight:600; }
@@ -572,22 +572,26 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   /* ── Voting arena: side-by-side cards ───────────────────────────────── */
   .arena {
     flex-direction:row;
-    padding:10px 6px 4px;
+    padding:8px 6px 6px;
     gap:0;
     overflow:hidden;
     align-items:stretch;
     justify-content:flex-start;
+    min-height:0; /* critical: lets flex child shrink so bottom-bar stays on screen */
+    flex:1;
   }
 
-  .card-col { flex:1; min-width:0; max-width:none; width:auto; }
+  .card-col { flex:1; min-width:0; max-width:none; width:auto; min-height:0; display:flex; flex-direction:column; }
 
   .pedal-card {
     flex-direction:column;
     align-items:center;
-    padding:12px 8px 10px;
-    gap:8px;
+    padding:10px 8px 8px;
+    gap:6px;
     border-radius:12px;
-    height:100%;
+    flex:1;       /* fill card-col height */
+    min-height:0; /* don't overflow parent */
+    overflow:hidden;
   }
 
   /* Larger images in side-by-side layout */
@@ -596,10 +600,10 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .img-ph span { font-size:28px; }
 
   .pedal-meta   { text-align:center; }
-  .pedal-name   { font-size:14px; }
-  .pedal-brand  { font-size:9px; letter-spacing:2px; }
+  .pedal-name   { font-size:15px; }
+  .pedal-brand  { font-size:10px; letter-spacing:2px; }
   .pedal-stats  { justify-content:center; gap:8px; }
-  .ps-v         { font-size:12px; }
+  .ps-v         { font-size:13px; }
   .vote-hint    { display:none; }
 
   /* VS divider: vertical strip between the two cards */
@@ -1165,8 +1169,15 @@ export default function App() {
               key={id}
               className={`mobile-nav-btn${mobileTab === id ? " active" : ""}`}
               onClick={() => {
-                setMobileTab(id);
-                if (id !== "vote") setSidebarTab(id === "rankings" ? "rankings" : id);
+                if (id === "vote") {
+                  // Always close sheet and show voting arena
+                  setMobileTab("vote");
+                  setSidebarTab("rankings");
+                } else {
+                  // Open sheet to this panel; update both so main content is correct
+                  setMobileTab(id);
+                  setSidebarTab(id);
+                }
               }}
             >
               <span className="nav-icon">{icon}</span>
