@@ -528,8 +528,9 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .app { flex-direction:column; position:relative; }
 
   /* ── Sidebar → bottom sheet ──────────────────────────────────────────── */
+  /* bottom:56px anchors the sheet above the in-flow nav */
   .sidebar {
-    position:fixed; left:0; right:0; bottom:0;
+    position:fixed; left:0; right:0; bottom:56px;
     width:100%; min-width:unset;
     height:calc(100dvh - 56px);
     transform:translateY(100%);
@@ -538,6 +539,11 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
     border-radius:16px 16px 0 0; z-index:200;
   }
   .sidebar.sheet-open { transform:translateY(0); }
+
+  /* On content tabs (About/Analysis), hide rankings-only controls in the sheet */
+  .sidebar.content-tab .mode-section,
+  .sidebar.content-tab .brand-section,
+  .sidebar.content-tab .battle-explain { display:none; }
 
   .sb-top  { display:none; }
   .sb-tabs { display:none; }
@@ -558,14 +564,12 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
     padding-bottom:16px;
   }
 
-  /* Mode section: compact; hidden when irrelevant tab is open */
   .mode-section { padding:8px 12px 6px; }
-  .mode-section-hidden { display:none; }
 
   .brand-scroll { max-height:180px; }
 
   /* ── Main area ───────────────────────────────────────────────────────── */
-  .main { flex:1; height:calc(100dvh - 56px); overflow:hidden; }
+  .main { flex:1; overflow:hidden; min-height:0; }
   .main-header { padding:10px 14px 8px; }
   .main-title  { font-size:22px; letter-spacing:2px; }
 
@@ -623,9 +627,11 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .footer { display:none; }
 
   /* ── Bottom navigation bar ───────────────────────────────────────────── */
+  /* In-flow nav: lives at the bottom of .app flex column.
+     .main gets flex:1 and naturally fills 100dvh minus these 56px. */
   .mobile-nav {
     display:flex;
-    position:fixed; bottom:0; left:0; right:0; height:56px;
+    flex-shrink:0; height:56px; width:100%;
     background:var(--s1); border-top:1px solid var(--border); z-index:300;
   }
   .mobile-nav-btn {
@@ -901,7 +907,7 @@ export default function App() {
       <div className="app">
 
         {/* ── Sidebar ─────────────────────────────────────────────────── */}
-        <aside className={`sidebar${mobileTab !== "vote" ? " sheet-open" : ""}`}>
+        <aside className={`sidebar${mobileTab !== "vote" ? " sheet-open" : ""}${(sidebarTab === "about" || sidebarTab === "analysis") ? " content-tab" : ""}`}>
 
           {/* Peek strip — tap to go back to voting on mobile */}
           <div className="sheet-peek" onClick={() => setMobileTab("vote")}>
@@ -920,7 +926,7 @@ export default function App() {
           </div>
 
           {/* Mode selector — hidden on mobile when viewing About or Analysis */}
-          <div className={`mode-section${(sidebarTab === "about" || sidebarTab === "analysis") ? " mode-section-hidden" : ""}`}>
+          <div className="mode-section">
             <div className="mode-label">Mode</div>
             <div className="mode-pills">
               {[["global","All Pedals"],["pool","Brand Pool"],["battle","Brand Battle"]].map(([m, lbl]) => (
