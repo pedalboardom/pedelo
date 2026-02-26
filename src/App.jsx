@@ -597,14 +597,13 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
   /* ── Voting arena: side-by-side cards ──────────────────────────────── */
   .arena {
-    flex:1;               /* take remaining space between header & bottom-bar */
+    flex:0 0 auto;        /* content-sized — no stretching */
     flex-direction:row;
-    align-items:flex-start; /* ← KEY: cards wrap content, don't stretch tall */
+    align-items:flex-start; /* cards wrap content, don't stretch tall */
     justify-content:center;
     padding:8px 6px;
     gap:0;
     overflow:hidden;
-    min-height:0;
   }
 
   .card-col {
@@ -636,8 +635,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .vote-hint    { display:none; }
 
   /* VS divider */
-  .vs-wrap { flex-direction:column; padding:0 4px; width:30px; flex-shrink:0; align-self:stretch; }
-  .vs-line { width:1px; flex:1; height:auto; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
+  .vs-wrap { flex-direction:column; padding:0 4px; width:30px; flex-shrink:0; }
+  .vs-line { width:1px; height:40px; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
   .vs-text { font-size:13px; }
 
   /* ── Bottom bar: centred Skip button ───────────────────────────────── */
