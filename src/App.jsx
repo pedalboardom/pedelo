@@ -1634,11 +1634,13 @@ function AboutPanel() {
 
         <div className="about-callout" style={{ marginTop: 14 }}>
           <div className="about-callout-title">Matchmaking</div>
-          Matchups are never random. The algorithm always pairs pedals from <b>different brands</b> and
-          tries to anchor each matchup with at least one well-known pedal (50+ community votes) so
-          you almost always recognise at least one competitor. Within those constraints, pedals are
-          matched close in rating — similar to how chess tournaments are seeded — so both outcomes
-          are plausible and every vote moves the needle meaningfully.
+          Matchups are never random. The algorithm always pairs pedals from <b>different brands</b>.
+          Early on, when ratings are still converging, matchups are drawn randomly across the full
+          catalogue — pure exploration. Once the community has cast enough votes that ratings have
+          meaningfully diverged, the algorithm switches to <b>seeded pairing</b>: pedals are sorted
+          by rating and matched close in rank, similar to how chess tournaments are structured, so
+          both outcomes are plausible and every vote moves the needle meaningfully. The switch
+          happens automatically — no configuration needed.
         </div>
 
         <div className="about-callout" style={{ marginTop: 10, background: "rgba(96,165,250,.07)", borderColor: "rgba(96,165,250,.2)" }}>
