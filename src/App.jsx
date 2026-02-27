@@ -277,28 +277,21 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .vs-line { width:1px; height:52px; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
 .vs-text { font-family:var(--fd); font-size:28px; letter-spacing:3px; color:var(--dim); }
 
-/* ── Bottom bar ───────────────────────────────────────────────────────── */
-.bottom-bar {
-  padding:12px 26px 6px; display:flex; align-items:center;
-  flex-shrink:0; width:100%;
+/* ── Vote controls: skip + hints, centred below cards ─────────────────── */
+.vote-controls {
+  display:flex; flex-direction:column; align-items:center;
+  gap:10px; padding:16px 26px 12px; flex-shrink:0;
 }
-/* k-note takes left slot; skip centred; kbd-hint takes right slot */
-.k-note { font-family:var(--fc); font-size:11px; color:var(--dim); flex:1; }
-.k-note b { color:var(--text); font-weight:700; }
 .skip-btn {
-  padding:5px 16px; background:transparent; border:1px solid var(--border); border-radius:20px;
+  padding:5px 20px; background:transparent; border:1px solid var(--border); border-radius:20px;
   color:var(--dim); font-family:var(--fc); font-size:11px; letter-spacing:1px;
   text-transform:uppercase; cursor:pointer; transition:all .15s;
 }
 .skip-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-/* Swipe hint — mobile only (hidden by default, shown in mobile media query) */
-.swipe-hint { display:none; }
-
-/* Keyboard hint — lives inside .bottom-bar on desktop */
+/* Keyboard hint row (desktop) */
 .kbd-hint {
   display:flex; align-items:center; gap:16px;
-  flex:1; justify-content:flex-end;
 }
 .kbd-hint-label {
   font-family:var(--fc); font-size:10px; color:var(--dim);
@@ -309,6 +302,18 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   font-family:var(--fc); font-size:10px; color:var(--dim);
   text-transform:uppercase; letter-spacing:1px;
 }
+
+/* Swipe hint — mobile only (hidden by default) */
+.swipe-hint { display:none; }
+
+/* ── K-bar: k-factor info, bottom of main above footer (desktop only) ── */
+.k-bar {
+  border-top:1px solid var(--border); background:var(--s1);
+  padding:7px 26px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.k-note { font-family:var(--fc); font-size:11px; color:var(--dim); }
+.k-note b { color:var(--text); font-weight:700; }
 .kbd {
   display:inline-flex; align-items:center; justify-content:center;
   min-width:22px; height:20px; padding:0 5px;
@@ -568,7 +573,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
      .main-header         flex-shrink:0
      .arena-wrap          flex:1  (absorbs leftover space, centres content vertically)
        .arena             flex:0 0 auto  (content-sized — cards don't stretch)
-       .bottom-bar        flex-shrink:0  (skip · swipe hint)
+       .vote-controls     flex-shrink:0  (skip · swipe hint on mobile / kbd hint on desktop)
+     .k-bar               hidden on mobile  (k-factor info, desktop only)
      .mobile-footer       flex-shrink:0  (credits line)
      .mobile-nav          flex-shrink:0  56px
 
@@ -689,12 +695,11 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .vs-line { width:1px; height:40px; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
   .vs-text { font-size:13px; }
 
-  /* ── Bottom bar: centred skip + swipe hint ─────────────────────────── */
-  .bottom-bar {
-    padding:10px 14px 4px;
-    flex-direction:column; align-items:center; gap:8px;
+  /* ── Vote controls: skip + swipe hint, centred column ──────────────── */
+  .vote-controls {
+    padding:10px 14px 6px;
+    gap:8px;
   }
-  .k-note { display:none; }
   .skip-btn {
     width:100%; max-width:280px; padding:10px; font-size:12px;
     letter-spacing:1.5px; border-radius:10px; text-align:center;
@@ -707,8 +712,9 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
     text-transform:uppercase; letter-spacing:1px;
   }
 
-  /* ── Desktop footer hidden ─────────────────────────────────────────── */
+  /* ── Desktop-only elements hidden ──────────────────────────────────── */
   .footer   { display:none; }
+  .k-bar    { display:none; }
   .kbd-hint { display:none; }
 
   /* ── Mobile credits footer ─────────────────────────────────────────── */
@@ -1153,35 +1159,39 @@ export default function App() {
                 )}
               </div>
 
-              <div className="bottom-bar">
-                <div className="k-note">
-                  K-factors:&nbsp;
-                  <b>{left  ? getK((activeRankings[left.id]  ?? {matches:0}).matches) : "—"}</b>
-                  &nbsp;/&nbsp;
-                  <b>{right ? getK((activeRankings[right.id] ?? {matches:0}).matches) : "—"}</b>
-                  &nbsp;— higher = faster rating movement for new pedals
-                </div>
+              <div className="vote-controls">
                 <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setSkipCount((n) => n + 1); setPhase("voting"); }}>Skip matchup</button>
+                {/* Keyboard hints — desktop only */}
                 <div className="kbd-hint">
                   <span className="kbd-hint-label">Keyboard:</span>
                   <div className="kbd-item"><kbd className="kbd">←</kbd> Vote left</div>
                   <div className="kbd-item"><kbd className="kbd">→</kbd> Vote right</div>
                   <div className="kbd-item"><kbd className="kbd">↓</kbd> Skip</div>
                 </div>
-              </div>
-
-              {/* Swipe hint — mobile only */}
-              <div className="swipe-hint">
-                <span>⟵ Vote left</span>
-                <span>·</span>
-                <span>Vote right ⟶</span>
-                <span>·</span>
-                <span>↓ Skip</span>
+                {/* Swipe hints — mobile only */}
+                <div className="swipe-hint">
+                  <span>⟵ Vote left</span>
+                  <span>·</span>
+                  <span>Vote right ⟶</span>
+                  <span>·</span>
+                  <span>↓ Skip</span>
+                </div>
               </div>
 
               </div>{/* end arena-wrap */}
             </>
           )}
+
+          {/* K-factor info — desktop only, above footer */}
+          <div className="k-bar">
+            <div className="k-note">
+              K-factors:&nbsp;
+              <b>{left  ? getK((activeRankings[left.id]  ?? {matches:0}).matches) : "—"}</b>
+              &nbsp;/&nbsp;
+              <b>{right ? getK((activeRankings[right.id] ?? {matches:0}).matches) : "—"}</b>
+              &nbsp;— higher = faster rating movement for new pedals
+            </div>
+          </div>
 
           <footer className="footer">
             <div className="footer-txt">Made by <a href="https://www.linkedin.com/in/jeremydabramson/" target="_blank" rel="noopener noreferrer">Jeremy Abramson</a></div>
