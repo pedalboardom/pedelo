@@ -436,15 +436,6 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .tog:hover  { color:var(--text); border-color:var(--dim2); }
 .tog.active { background:var(--a-dim); border-color:var(--accent); color:var(--accent); }
 
-/* Explorer brand filter */
-.explorer-brands { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
-.ebrand-chip {
-  padding:2px 8px; border-radius:20px; border:1px solid var(--border);
-  font-family:var(--fc); font-size:10px; color:var(--dim); cursor:pointer; transition:all .12s;
-}
-.ebrand-chip:hover  { border-color:var(--dim2); color:var(--text); }
-.ebrand-chip.active { background:var(--a-dim); border-color:var(--accent); color:var(--accent); }
-
 /* Pedal table */
 .pedal-table { width:100%; border-collapse:collapse; }
 .pedal-table th {
@@ -1537,10 +1528,9 @@ function PedalCard({ pedal, stats, status, onClick }) {
 // ─── Analysis Panel ───────────────────────────────────────────────────────────
 
 function AnalysisPanel({ pedals, globalRankings, history, brands }) {
-  const [search,       setSearch]       = useState("");
-  const [listMode,     setListMode]     = useState("top"); // top | bottom | search
-  const [filterBrands, setFilterBrands] = useState(new Set());
-  const [listN,        setListN]        = useState(10);
+  const [search,   setSearch]   = useState("");
+  const [listMode, setListMode] = useState("top"); // top | bottom | search
+  const [listN,    setListN]    = useState(10);
 
   // Build enriched + sorted pedal list
   const allRanked = useMemo(() =>
@@ -1552,23 +1542,17 @@ function AnalysisPanel({ pedals, globalRankings, history, brands }) {
     [pedals, globalRankings]
   );
 
-  // Filter by selected brands
-  const brandFiltered = useMemo(() =>
-    filterBrands.size > 0 ? allRanked.filter((p) => filterBrands.has(p.brand)) : allRanked,
-    [allRanked, filterBrands]
-  );
-
   // Explorer results
   const explorerRows = useMemo(() => {
     if (listMode === "search") {
       const q = search.toLowerCase();
-      return brandFiltered.filter((p) =>
+      return allRanked.filter((p) =>
         p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
       ).slice(0, 30);
     }
-    if (listMode === "bottom") return [...brandFiltered].reverse().slice(0, listN);
-    return brandFiltered.slice(0, listN);
-  }, [brandFiltered, listMode, search, listN]);
+    if (listMode === "bottom") return [...allRanked].reverse().slice(0, listN);
+    return allRanked.slice(0, listN);
+  }, [allRanked, listMode, search, listN]);
 
   // Brand report
   const brandReport = useMemo(() => {
@@ -1653,21 +1637,6 @@ function AnalysisPanel({ pedals, globalRankings, history, brands }) {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Brand filter chips */}
-          <div className="explorer-brands">
-            {brands.map(([brand]) => (
-              <div key={brand}
-                className={`ebrand-chip ${filterBrands.has(brand) ? "active" : ""}`}
-                onClick={() => setFilterBrands((prev) => {
-                  const next = new Set(prev);
-                  prev.has(brand) ? next.delete(brand) : next.add(brand);
-                  return next;
-                })}>
-                {brand}
-              </div>
-            ))}
           </div>
 
           {explorerRows.length > 0 ? (
