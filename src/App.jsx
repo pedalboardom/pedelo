@@ -239,6 +239,25 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 }
 .skip-btn:hover { border-color:var(--accent); color:var(--accent); }
 
+
+/* Keyboard hint */
+.kbd-hint {
+  display:flex; align-items:center; justify-content:center; gap:20px;
+  padding:7px 26px; border-top:1px solid var(--border); background:var(--bg);
+  flex-shrink:0;
+}
+.kbd-item {
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--fc); font-size:10px; color:var(--dim);
+  text-transform:uppercase; letter-spacing:1px;
+}
+.kbd {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:22px; height:20px; padding:0 5px;
+  background:var(--s2); border:1px solid var(--border); border-bottom-width:2px;
+  border-radius:4px; font-family:var(--fc); font-size:11px; font-weight:700;
+  color:var(--dim2); line-height:1;
+}
 /* ── Footer ───────────────────────────────────────────────────────────── */
 .footer {
   border-top:1px solid var(--border); background:var(--bg);
@@ -618,7 +637,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   }
 
   /* ── Desktop footer hidden ─────────────────────────────────────────── */
-  .footer { display:none; }
+  .footer   { display:none; }
+  .kbd-hint { display:none; }
 
   /* ── Mobile credits footer ─────────────────────────────────────────── */
   .mobile-footer {
@@ -1068,6 +1088,13 @@ export default function App() {
                   &nbsp;— higher = faster rating movement for new pedals
                 </div>
                 <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setSkipCount((n) => n + 1); setPhase("voting"); }}>Skip matchup</button>
+              </div>
+
+              {/* Keyboard shortcut hint — desktop only */}
+              <div className="kbd-hint">
+                <div className="kbd-item"><kbd className="kbd">←</kbd> Vote left</div>
+                <div className="kbd-item"><kbd className="kbd">→</kbd> Vote right</div>
+                <div className="kbd-item"><kbd className="kbd">↓</kbd> Skip</div>
               </div>
             </>
           )}
