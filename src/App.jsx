@@ -217,6 +217,53 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 }
 
 
+/* ── Top nav (desktop only) ───────────────────────────────────────────── */
+.top-nav {
+  display:flex; align-items:center; gap:0;
+  background:var(--s1); border-bottom:1px solid var(--border); flex-shrink:0;
+  padding:0 20px;
+}
+.top-nav-logo {
+  font-family:var(--fd); font-size:20px; letter-spacing:3px; color:var(--accent);
+  line-height:1; flex-shrink:0; margin-right:24px; padding:12px 0;
+}
+.top-nav-tabs { display:flex; flex:1; }
+.top-nav-tab {
+  padding:14px 16px; background:transparent; border:none; border-bottom:2px solid transparent;
+  font-family:var(--fc); font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.5px; color:var(--dim); cursor:pointer; transition:color .15s;
+  margin-bottom:-1px; white-space:nowrap;
+}
+.top-nav-tab:hover  { color:var(--text); }
+.top-nav-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.top-nav-right { display:flex; align-items:center; gap:14px; flex-shrink:0; margin-left:auto; }
+.top-nav-mode  { display:flex; gap:5px; }
+.top-nav-pill {
+  padding:4px 12px; background:var(--s2); border:1px solid var(--border); border-radius:20px;
+  font-family:var(--fc); font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; color:var(--dim); cursor:pointer; transition:all .15s;
+}
+.top-nav-pill:hover  { border-color:var(--dim2); color:var(--text); }
+.top-nav-pill.active { background:var(--a-dim); border-color:var(--accent); color:var(--accent); }
+.top-nav-sync { font-family:var(--fc); font-size:10px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; white-space:nowrap; }
+
+/* ── Filter bar (desktop only, below top-nav when Brand Pool active) ──── */
+.filter-bar {
+  background:var(--s1); border-bottom:1px solid var(--border); flex-shrink:0; padding:0;
+}
+.filter-bar .brand-section { border-bottom:none; padding:8px 20px; }
+
+/* ── Mobile mode strip (below main-header on mobile, hidden on desktop) ─ */
+.mobile-mode { display:none; }
+
+/* ── Full-width rankings panel (desktop Rankings tab) ─────────────────── */
+.rankings-panel {
+  flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0;
+}
+.rankings-panel .stat-row { flex-shrink:0; }
+.rankings-panel .lb-scroll { flex:1; }
+.lb-scroll-inner { max-width:700px; margin:0 auto; padding:0 20px; }
+
 /* ── Voting arena ─────────────────────────────────────────────────────── */
 /* arena-wrap fills remaining main height and centres the card block */
 .arena-wrap {
@@ -566,6 +613,13 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .mobile-sheet-content { display:none; }
 .mobile-footer { display:none; }
 
+/* ── Desktop: sidebar hidden, main fills full width ───────────────────── */
+@media (min-width: 768px) {
+  .sidebar      { display:none !important; }
+  .main-header  { display:none; }           /* replaced by top-nav */
+  .mobile-mode  { display:none !important; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE LAYOUT  (≤ 767px)
 
@@ -603,9 +657,10 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   }
   .sidebar.sheet-open { transform:translateY(0); }
 
-  /* On content tabs (About/Analysis), hide rankings-only controls */
-  .sidebar.content-tab .mode-section,
-  .sidebar.content-tab .brand-section { display:none; }
+  /* Hide mode/brand sections from sidebar sheet — mode control is in the
+     mobile-mode strip on the main vote screen */
+  .sidebar .mode-section  { display:none; }
+  .sidebar .brand-section { display:none; }
 
   /* Hide desktop-only sidebar chrome */
   .sb-top  { display:none; }
@@ -643,8 +698,16 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
     min-height:0;          /* allow flex shrink */
   }
 
+  .top-nav     { display:none; }
+  .filter-bar  { display:none; }
   .main-header { padding:10px 14px 8px; flex-shrink:0; }
   .main-title  { font-size:22px; letter-spacing:2px; }
+
+  /* Mode strip visible on mobile below main-header */
+  .mobile-mode {
+    display:flex; gap:5px; padding:4px 12px 8px; flex-shrink:0;
+  }
+  .mobile-mode .mode-pill { font-size:10px; padding:4px 10px; }
 
   /* arena-wrap fills .main and centres the card+skip+hint block */
   .arena-wrap {
@@ -777,7 +840,7 @@ export default function App() {
   const [globalVotes,    setGlobalVotes]    = useState(0);
 
   // ── UI ────────────────────────────────────────────────────────────────────
-  const [sidebarTab,  setSidebarTab]  = useState("rankings"); // rankings | analysis | about
+  const [sidebarTab,  setSidebarTab]  = useState("vote");     // vote | rankings | analysis | about
   const [skipCount,   setSkipCount]   = useState(0);            // incremented to force new matchup
   const [mobileTab,   setMobileTab]   = useState("vote");     // vote | rankings | analysis | about
   const [mode,        setMode]        = useState("global");   // global | pool
@@ -918,7 +981,7 @@ export default function App() {
   useEffect(() => {
     function onKey(e) {
       // Only active on the voting screen; ignore if focus is in an input
-      if (sidebarTab !== "rankings") return;
+      if (sidebarTab !== "vote") return;
       if (phase !== "voting") return;
       if (!matchup) return;
       if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
@@ -972,7 +1035,7 @@ export default function App() {
       <div className="app">
 
         {/* ── Sidebar ─────────────────────────────────────────────────── */}
-        <aside className={`sidebar${mobileTab !== "vote" ? " sheet-open" : ""}${(sidebarTab === "about" || sidebarTab === "analysis") ? " content-tab" : ""}`}>
+        <aside className={`sidebar${mobileTab !== "vote" ? " sheet-open" : ""}`}>
 
           {/* Peek strip — tap to go back to voting on mobile */}
           <div className="sheet-peek" onClick={() => setMobileTab("vote")}>
@@ -990,17 +1053,7 @@ export default function App() {
             <button className={`sb-tab ${sidebarTab === "about"    ? "active" : ""}`} onClick={() => { setSidebarTab("about");    setMobileTab("about");    }}>About</button>
           </div>
 
-          {/* Mode selector — hidden on mobile when viewing About or Analysis */}
-          <div className="mode-section">
-            <div className="mode-label">Mode</div>
-            <div className="mode-pills">
-              {[["global","All Pedals"],["pool","Brand Pool"]].map(([m, lbl]) => (
-                <div key={m} className={`mode-pill ${mode === m ? "active" : ""}`} onClick={() => setMode(m)}>{lbl}</div>
-              ))}
-            </div>
-          </div>
-
-          {/* Brand Pool filter */}
+          {/* Brand Pool filter — mobile only, shown in rankings sheet */}
           {mode === "pool" && (
             <BrandPoolFilter
               brands={brands}
@@ -1012,7 +1065,7 @@ export default function App() {
 
 
 
-          {/* Rankings tab content */}
+          {/* Rankings tab content — mobile only (desktop uses main rankings panel) */}
           {sidebarTab === "rankings" && (
             <>
               <div className="stat-row">
@@ -1020,7 +1073,6 @@ export default function App() {
                 <div className="stat"><div className="stat-v">{activePedals.length}</div><div className="stat-l">Pedals</div></div>
                 <div className="stat"><div className="stat-v">{ranked.length}</div><div className="stat-l">Ranked</div></div>
               </div>
-
               <div className="lb-scroll">
                 {ranked.length > 0 && (
                   <>
@@ -1031,7 +1083,6 @@ export default function App() {
                 {unranked.length > 0 && (
                   <div className="lb-head" style={{ marginTop: 8 }}>Awaiting matchup — {unranked.length}</div>
                 )}
-
               </div>
             </>
           )}
@@ -1065,23 +1116,68 @@ export default function App() {
               </div>
             </div>
             {initError && <div style={{ fontFamily: "var(--fc)", fontSize: 10, color: "var(--red)" }}>⚠ {initError}</div>}
-            {import.meta.env.VITE_ALLOW_RESET === "true" && (
-              <button className="reset-btn" onClick={handleReset}>↺ Reset all rankings</button>
-            )}
           </div>
         </aside>
 
         {/* ── Main ────────────────────────────────────────────────────── */}
         <main className="main">
-          <div className="main-header">
-            <div className="main-title">
-              {sidebarTab === "analysis" ? <>RANKINGS <em>ANALYSIS</em></>
-               : sidebarTab === "about"  ? <>HOW IT <em>WORKS</em></>
-               : <>CHOOSE YOUR <em>WEAPON</em></>}
+
+          {/* Desktop top-nav ─────────────────────────────────────────── */}
+          <header className="top-nav">
+            <span className="top-nav-logo">PEDAL Elo</span>
+            <nav className="top-nav-tabs">
+              {[["vote","Vote"],["rankings","Rankings"],["analysis","Analysis"],["about","About"]].map(([id, lbl]) => (
+                <button key={id} className={`top-nav-tab${sidebarTab === id ? " active" : ""}`}
+                  onClick={() => { setSidebarTab(id); setMobileTab(id === "vote" ? "vote" : id); }}>
+                  {lbl}
+                </button>
+              ))}
+            </nav>
+            <div className="top-nav-right">
+              <div className="top-nav-mode">
+                {[["global","All Pedals"],["pool","Brand Pool"]].map(([m, lbl]) => (
+                  <div key={m} className={`top-nav-pill${mode === m ? " active" : ""}`}
+                    onClick={() => { setMode(m); recentIds.current = new Set(); setPhase("voting"); }}>
+                    {lbl}
+                  </div>
+                ))}
+              </div>
+              <div className={`top-nav-sync sync-${syncStatus}`}>
+                <div className="sync-dot" />
+                <div className="sync-txt">{ { ok:"Synced", saving:"Saving…", error:"Sync error", offline:"Offline" }[syncStatus] }</div>
+              </div>
+              {import.meta.env.VITE_ALLOW_RESET === "true" && (
+                <button className="reset-btn" style={{ margin:0 }} onClick={handleReset}>↺ Reset</button>
+              )}
             </div>
-            {sidebarTab === "rankings" && (
-              <div className="round-pill">Round {totalVotes + 1}</div>
-            )}
+          </header>
+
+          {/* Desktop brand pool filter bar ───────────────────────────── */}
+          {mode === "pool" && sidebarTab !== "about" && (
+            <div className="filter-bar">
+              <BrandPoolFilter
+                brands={brands}
+                poolBrands={poolBrands}
+                setPoolBrands={setPoolBrands}
+                onChanged={() => { recentIds.current = new Set(); setPhase("voting"); }}
+              />
+            </div>
+          )}
+
+          {/* Mobile main-header ──────────────────────────────────────── */}
+          <div className="main-header">
+            <div className="main-title">CHOOSE YOUR <em>WEAPON</em></div>
+            <div className="round-pill">Round {totalVotes + 1}</div>
+          </div>
+
+          {/* Mobile mode strip ───────────────────────────────────────── */}
+          <div className="mobile-mode">
+            {[["global","All Pedals"],["pool","Brand Pool"]].map(([m, lbl]) => (
+              <div key={m} className={`mode-pill${mode === m ? " active" : ""}`}
+                onClick={() => { setMode(m); recentIds.current = new Set(); setPhase("voting"); }}>
+                {lbl}
+              </div>
+            ))}
           </div>
 
           {sidebarTab === "analysis" ? (
@@ -1093,6 +1189,27 @@ export default function App() {
             />
           ) : sidebarTab === "about" ? (
             <AboutPanel />
+          ) : sidebarTab === "rankings" ? (
+            <div className="rankings-panel">
+              <div className="stat-row">
+                <div className="stat"><div className="stat-v">{totalVotes.toLocaleString()}</div><div className="stat-l">Votes</div></div>
+                <div className="stat"><div className="stat-v">{activePedals.length}</div><div className="stat-l">Pedals</div></div>
+                <div className="stat"><div className="stat-v">{ranked.length}</div><div className="stat-l">Ranked</div></div>
+              </div>
+              <div className="lb-scroll">
+                <div className="lb-scroll-inner">
+                  {ranked.length > 0 && (
+                    <>
+                      <div className="lb-head">Leaderboard</div>
+                      {ranked.map((p, i) => <LbRow key={p.id} pedal={p} rank={i} />)}
+                    </>
+                  )}
+                  {unranked.length > 0 && (
+                    <div className="lb-head" style={{ marginTop: 8 }}>Awaiting matchup — {unranked.length}</div>
+                  )}
+                </div>
+              </div>
+            </div>
           ) : (
             <>
               <div
@@ -1229,7 +1346,7 @@ export default function App() {
                 if (id === "vote" || id === mobileTab) {
                   // Vote tab OR tapping the already-active tab: retract sheet
                   setMobileTab("vote");
-                  setSidebarTab("rankings");
+                  setSidebarTab("vote");
                 } else {
                   // Open sheet to this panel
                   setMobileTab(id);
