@@ -816,6 +816,22 @@ export default function App() {
     [phase, activeRankings, globalRankings, globalVotes, history, matchup],
   );
 
+  // ── Keyboard shortcuts (desktop only) ───────────────────────────────────
+  useEffect(() => {
+    function onKey(e) {
+      // Only active on the voting screen; ignore if focus is in an input
+      if (sidebarTab !== "rankings") return;
+      if (phase !== "voting") return;
+      if (!matchup) return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.key === "ArrowLeft")  handleVote(matchup[0], matchup[1], null);
+      if (e.key === "ArrowRight") handleVote(matchup[1], matchup[0], null);
+      if (e.key === "ArrowDown")  { e.preventDefault(); recentIds.current = new Set(); setSkipCount((n) => n + 1); setPhase("voting"); }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sidebarTab, phase, matchup, handleVote]); // eslint-disable-line
+
   // ── Reset ─────────────────────────────────────────────────────────────────
   const handleReset = () => {
     if (!window.confirm("Reset ALL rankings? This cannot be undone.")) return;
