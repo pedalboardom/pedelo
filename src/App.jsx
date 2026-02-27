@@ -274,9 +274,10 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 /* ── Bottom bar ───────────────────────────────────────────────────────── */
 .bottom-bar {
   border-top:1px solid var(--border); background:var(--s1);
-  padding:9px 26px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+  padding:8px 26px; display:flex; align-items:center; flex-shrink:0;
 }
-.k-note { font-family:var(--fc); font-size:11px; color:var(--dim); }
+/* k-note takes left slot; skip centred; kbd-hint takes right slot */
+.k-note { font-family:var(--fc); font-size:11px; color:var(--dim); flex:1; }
 .k-note b { color:var(--text); font-weight:700; }
 .skip-btn {
   padding:5px 16px; background:transparent; border:1px solid var(--border); border-radius:20px;
@@ -286,14 +287,17 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 .skip-btn:hover { border-color:var(--accent); color:var(--accent); }
 
 
-/* Keyboard hint */
+/* Keyboard hint — lives inside .bottom-bar on desktop */
 .kbd-hint {
-  display:flex; align-items:center; justify-content:center; gap:20px;
-  padding:7px 26px; border-top:1px solid var(--border); background:var(--bg);
-  flex-shrink:0;
+  display:flex; align-items:center; gap:16px;
+  flex:1; justify-content:flex-end;
+}
+.kbd-hint-label {
+  font-family:var(--fc); font-size:10px; color:var(--dim);
+  text-transform:uppercase; letter-spacing:1px;
 }
 .kbd-item {
-  display:flex; align-items:center; gap:6px;
+  display:flex; align-items:center; gap:5px;
   font-family:var(--fc); font-size:10px; color:var(--dim);
   text-transform:uppercase; letter-spacing:1px;
 }
@@ -555,7 +559,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
    Layout zones (top → bottom, all in normal flow):
      .main-header         flex-shrink:0
      .arena               flex:1  (absorbs leftover space, cards DON'T stretch)
-     .bottom-bar          flex-shrink:0  (skip button)
+     .bottom-bar          flex-shrink:0  (k-note · skip · keyboard hint)
      .mobile-footer       flex-shrink:0  (credits line)
      .mobile-nav          flex-shrink:0  56px
 
@@ -1116,13 +1120,12 @@ export default function App() {
                   &nbsp;— higher = faster rating movement for new pedals
                 </div>
                 <button className="skip-btn" onClick={() => { recentIds.current = new Set(); setSkipCount((n) => n + 1); setPhase("voting"); }}>Skip matchup</button>
-              </div>
-
-              {/* Keyboard shortcut hint — desktop only */}
-              <div className="kbd-hint">
-                <div className="kbd-item"><kbd className="kbd">←</kbd> Vote left</div>
-                <div className="kbd-item"><kbd className="kbd">→</kbd> Vote right</div>
-                <div className="kbd-item"><kbd className="kbd">↓</kbd> Skip</div>
+                <div className="kbd-hint">
+                  <span className="kbd-hint-label">Keyboard:</span>
+                  <div className="kbd-item"><kbd className="kbd">←</kbd> Vote left</div>
+                  <div className="kbd-item"><kbd className="kbd">→</kbd> Vote right</div>
+                  <div className="kbd-item"><kbd className="kbd">↓</kbd> Skip</div>
+                </div>
               </div>
             </>
           )}
@@ -1814,7 +1817,7 @@ function AboutPanel() {
           meaningfully diverged, the algorithm switches to <b>seeded pairing</b>: pedals are sorted
           by rating and matched close in rank, similar to how chess tournaments are structured, so
           both outcomes are plausible and every vote moves the needle meaningfully. The switch
-          happens automatically — no configuration needed.
+          happens automatically.
         </div>
 
         <div className="about-callout" style={{ marginTop: 10, background: "rgba(96,165,250,.07)", borderColor: "rgba(96,165,250,.2)" }}>
