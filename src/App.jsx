@@ -1022,7 +1022,7 @@ export default function App() {
     <>
       <style>{CSS}</style>
       <div className="loading">
-        <div className="loading-title">PEDAL Elo</div>
+        <div className="loading-title"><b>ped</b>Elo</div>
         <div className="loading-sub">Loading the arsenal…</div>
       </div>
     </>
@@ -1043,7 +1043,7 @@ export default function App() {
           </div>
 
           <div className="sb-top">
-            <div className="sb-logo">PEDAL Elo</div>
+            <div className="sb-logo"><b style={{letterSpacing:"3px"}}>ped</b>Elo<span style={{fontSize:"0.5em",letterSpacing:"2px",color:"var(--dim)",marginLeft:"6px",fontFamily:"var(--fc)",fontWeight:400,verticalAlign:"middle"}}>Pedal Elo</span></div>
             <div className="sb-sub">Guitar Pedal Rankings</div>
           </div>
 
@@ -1124,7 +1124,7 @@ export default function App() {
 
           {/* Desktop top-nav ─────────────────────────────────────────── */}
           <header className="top-nav">
-            <span className="top-nav-logo">PEDAL Elo</span>
+            <span className="top-nav-logo"><b>ped</b>Elo<span style={{fontSize:"0.65em",letterSpacing:"2px",color:"var(--dim)",marginLeft:"8px",fontFamily:"var(--fc)",fontWeight:400}}>Pedal Elo</span></span>
             <nav className="top-nav-tabs">
               {[["vote","Vote"],["rankings","Rankings"],["analysis","Analysis"],["about","About"]].map(([id, lbl]) => (
                 <button key={id} className={`top-nav-tab${sidebarTab === id ? " active" : ""}`}
@@ -1134,14 +1134,16 @@ export default function App() {
               ))}
             </nav>
             <div className="top-nav-right">
-              <div className="top-nav-mode">
-                {[["global","All Pedals"],["pool","Brand Pool"]].map(([m, lbl]) => (
-                  <div key={m} className={`top-nav-pill${mode === m ? " active" : ""}`}
-                    onClick={() => { setMode(m); recentIds.current = new Set(); setPhase("voting"); }}>
-                    {lbl}
-                  </div>
-                ))}
-              </div>
+              {sidebarTab === "vote" && (
+                <div className="top-nav-mode">
+                  {[["global","All Pedals"],["pool","Brand Pool"]].map(([m, lbl]) => (
+                    <div key={m} className={`top-nav-pill${mode === m ? " active" : ""}`}
+                      onClick={() => { setMode(m); recentIds.current = new Set(); setPhase("voting"); }}>
+                      {lbl}
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className={`top-nav-sync sync-${syncStatus}`}>
                 <div className="sync-dot" />
                 <div className="sync-txt">{ { ok:"Synced", saving:"Saving…", error:"Sync error", offline:"Offline" }[syncStatus] }</div>
@@ -1153,7 +1155,7 @@ export default function App() {
           </header>
 
           {/* Desktop brand pool filter bar ───────────────────────────── */}
-          {mode === "pool" && sidebarTab !== "about" && (
+          {mode === "pool" && sidebarTab === "vote" && (
             <div className="filter-bar">
               <BrandPoolFilter
                 brands={brands}
@@ -1299,8 +1301,8 @@ export default function App() {
             </>
           )}
 
-          {/* K-factor info — desktop only, above footer */}
-          <div className="k-bar">
+          {/* K-factor info — desktop only, vote tab only */}
+          {sidebarTab === "vote" && <div className="k-bar">
             <div className="k-note">
               K-factors:&nbsp;
               <b>{left  ? getK((activeRankings[left.id]  ?? {matches:0}).matches) : "—"}</b>
@@ -1308,7 +1310,7 @@ export default function App() {
               <b>{right ? getK((activeRankings[right.id] ?? {matches:0}).matches) : "—"}</b>
               &nbsp;— higher = faster rating movement for new pedals
             </div>
-          </div>
+          </div>}
 
           <footer className="footer">
             <div className="footer-txt">Made by <a href="https://www.linkedin.com/in/jeremydabramson/" target="_blank" rel="noopener noreferrer">Jeremy Abramson</a></div>
