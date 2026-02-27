@@ -218,9 +218,15 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
 
 /* ── Voting arena ─────────────────────────────────────────────────────── */
+/* arena-wrap fills remaining main height and centres the card block */
+.arena-wrap {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden; min-height:0;
+}
 .arena {
-  flex:1; display:flex; align-items:center; justify-content:center;
-  padding:24px 28px; overflow:hidden;
+  flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  padding:24px 28px; overflow:hidden; width:100%;
 }
 .card-col { flex:1; max-width:410px; display:flex; flex-direction:column; align-items:center; }
 
@@ -273,8 +279,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
 /* ── Bottom bar ───────────────────────────────────────────────────────── */
 .bottom-bar {
-  border-top:1px solid var(--border); background:var(--s1);
-  padding:8px 26px; display:flex; align-items:center; flex-shrink:0;
+  padding:12px 26px 6px; display:flex; align-items:center;
+  flex-shrink:0; width:100%;
 }
 /* k-note takes left slot; skip centred; kbd-hint takes right slot */
 .k-note { font-family:var(--fc); font-size:11px; color:var(--dim); flex:1; }
@@ -286,6 +292,8 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 }
 .skip-btn:hover { border-color:var(--accent); color:var(--accent); }
 
+/* Swipe hint — mobile only (hidden by default, shown in mobile media query) */
+.swipe-hint { display:none; }
 
 /* Keyboard hint — lives inside .bottom-bar on desktop */
 .kbd-hint {
@@ -558,8 +566,9 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
    Layout zones (top → bottom, all in normal flow):
      .main-header         flex-shrink:0
-     .arena               flex:1  (absorbs leftover space, cards DON'T stretch)
-     .bottom-bar          flex-shrink:0  (k-note · skip · keyboard hint)
+     .arena-wrap          flex:1  (absorbs leftover space, centres content vertically)
+       .arena             flex:0 0 auto  (content-sized — cards don't stretch)
+       .bottom-bar        flex-shrink:0  (skip · swipe hint)
      .mobile-footer       flex-shrink:0  (credits line)
      .mobile-nav          flex-shrink:0  56px
 
@@ -631,6 +640,11 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .main-header { padding:10px 14px 8px; flex-shrink:0; }
   .main-title  { font-size:22px; letter-spacing:2px; }
 
+  /* arena-wrap fills .main and centres the card+skip+hint block */
+  .arena-wrap {
+    justify-content:center;  /* vertically centre the whole voting block */
+  }
+
   /* ── Voting arena: side-by-side cards ──────────────────────────────── */
   .arena {
     flex:0 0 auto;        /* content-sized — no stretching */
@@ -675,16 +689,22 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
   .vs-line { width:1px; height:40px; background:linear-gradient(to bottom,transparent,var(--border),transparent); }
   .vs-text { font-size:13px; }
 
-  /* ── Bottom bar: centred Skip button ───────────────────────────────── */
+  /* ── Bottom bar: centred skip + swipe hint ─────────────────────────── */
   .bottom-bar {
-    flex-shrink:0;
-    padding:8px 14px;
-    justify-content:center;
+    padding:10px 14px 4px;
+    flex-direction:column; align-items:center; gap:8px;
   }
   .k-note { display:none; }
   .skip-btn {
     width:100%; max-width:280px; padding:10px; font-size:12px;
     letter-spacing:1.5px; border-radius:10px; text-align:center;
+  }
+
+  /* ── Swipe hint: visible on mobile ─────────────────────────────────── */
+  .swipe-hint {
+    display:flex; align-items:center; gap:14px;
+    font-family:var(--fc); font-size:10px; color:var(--dim);
+    text-transform:uppercase; letter-spacing:1px;
   }
 
   /* ── Desktop footer hidden ─────────────────────────────────────────── */
@@ -765,7 +785,8 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState("ok");
   const [initError,  setInitError]  = useState(null);
 
-  const recentIds = useRef(new Set());
+  const recentIds   = useRef(new Set());
+  const touchStart  = useRef(null);
 
   // ── Init ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1068,6 +1089,27 @@ export default function App() {
             <AboutPanel />
           ) : (
             <>
+              <div
+                className="arena-wrap"
+                onTouchStart={(e) => {
+                  touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }}
+                onTouchEnd={(e) => {
+                  if (!touchStart.current || !matchup || phase !== "voting") return;
+                  const dx = e.changedTouches[0].clientX - touchStart.current.x;
+                  const dy = e.changedTouches[0].clientY - touchStart.current.y;
+                  touchStart.current = null;
+                  if (Math.abs(dx) < 50 && Math.abs(dy) < 50) return; // too short
+                  if (Math.abs(dx) >= Math.abs(dy)) {
+                    // Horizontal swipe: swipe right = vote right pedal, swipe left = vote left
+                    if (dx > 0) handleVote(matchup[1], matchup[0], null);
+                    else        handleVote(matchup[0], matchup[1], null);
+                  } else if (dy > 0) {
+                    // Swipe down = skip
+                    recentIds.current = new Set(); setSkipCount((n) => n + 1); setPhase("voting");
+                  }
+                }}
+              >
               <div className="arena">
                 {activePedals.length < 2 ? (
                   <div className="empty-state">
@@ -1127,6 +1169,17 @@ export default function App() {
                   <div className="kbd-item"><kbd className="kbd">↓</kbd> Skip</div>
                 </div>
               </div>
+
+              {/* Swipe hint — mobile only */}
+              <div className="swipe-hint">
+                <span>⟵ Vote left</span>
+                <span>·</span>
+                <span>Vote right ⟶</span>
+                <span>·</span>
+                <span>↓ Skip</span>
+              </div>
+
+              </div>{/* end arena-wrap */}
             </>
           )}
 
