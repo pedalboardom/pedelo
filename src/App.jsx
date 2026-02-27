@@ -93,6 +93,52 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
 /* ── Brand filter ─────────────────────────────────────────────────────── */
 .brand-section { padding:8px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
+
+/* Brand Pool search + tags */
+.bp-search-wrap { position:relative; margin-bottom:6px; }
+.bp-input {
+  width:100%; background:var(--s2); border:1px solid var(--border); border-radius:6px;
+  padding:6px 28px 6px 8px; color:var(--text); font-family:var(--fc); font-size:12px;
+  transition:border-color .15s;
+}
+.bp-input:focus { outline:none; border-color:var(--accent); }
+.bp-input::placeholder { color:var(--dim); }
+.bp-clear {
+  position:absolute; right:7px; top:50%; transform:translateY(-50%);
+  background:transparent; border:none; color:var(--dim); cursor:pointer;
+  font-size:14px; line-height:1; padding:0; transition:color .15s;
+}
+.bp-clear:hover { color:var(--text); }
+.bp-dropdown {
+  position:absolute; top:calc(100% + 3px); left:0; right:0; z-index:400;
+  background:var(--s1); border:1px solid var(--border); border-radius:6px;
+  overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.4);
+  max-height:180px; overflow-y:auto;
+}
+.bp-dropdown::-webkit-scrollbar { width:3px; }
+.bp-dropdown::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.bp-dropdown-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:7px 10px; cursor:pointer; font-family:var(--fc); font-size:12px; color:var(--dim2);
+  transition:background .1s, color .1s;
+}
+.bp-dropdown-item:hover { background:var(--s2); color:var(--text); }
+.bp-dropdown-item-count { font-size:10px; color:var(--dim); }
+.bp-dropdown-empty { padding:10px; font-family:var(--fc); font-size:11px; color:var(--dim); text-align:center; }
+.bp-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:2px; }
+.bp-tag {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 6px 2px 8px; background:var(--a-dim); border:1px solid var(--accent);
+  border-radius:20px; font-family:var(--fc); font-size:10px; color:var(--accent);
+  max-width:120px;
+}
+.bp-tag-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bp-tag-remove {
+  background:transparent; border:none; color:var(--accent); cursor:pointer;
+  font-size:12px; line-height:1; padding:0; flex-shrink:0; opacity:.7; transition:opacity .15s;
+}
+.bp-tag-remove:hover { opacity:1; }
+.bp-all-msg { font-family:var(--fc); font-size:10px; color:var(--dim); font-style:italic; margin-top:2px; }
 .brand-label { font-family:var(--fc); font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--dim); margin-bottom:6px; }
 .brand-scroll { max-height:130px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; }
 .brand-scroll::-webkit-scrollbar { width:3px; }
@@ -567,6 +613,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--fb); overflow:
 
   .mode-section { padding:8px 12px 6px; }
   .brand-scroll { max-height:180px; }
+  .bp-tags { display:none; }
 
   /* ── Main column ───────────────────────────────────────────────────── */
   .main {
@@ -924,31 +971,12 @@ export default function App() {
 
           {/* Brand Pool filter */}
           {mode === "pool" && (
-            <div className="brand-section">
-              <div className="brand-label">
-                {poolBrands.size === 0 ? "Filter by brand — votes count globally" : `${poolBrands.size} brand${poolBrands.size > 1 ? "s" : ""} selected · votes count globally`}
-              </div>
-              <div className="brand-scroll">
-                {brands.map(([brand, count]) => {
-                  const active = poolBrands.has(brand);
-                  return (
-                    <div key={brand} className={`brand-chip ${active ? "active" : ""}`} onClick={() => {
-                      setPoolBrands((prev) => {
-                        const next = new Set(prev);
-                        active ? next.delete(brand) : next.add(brand);
-                        return next;
-                      });
-                      recentIds.current = new Set();
-                      setPhase("voting");
-                    }}>
-                      <div className="brand-chip-dot" />
-                      <div className="brand-chip-name">{brand}</div>
-                      <div className="brand-chip-count">{count}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <BrandPoolFilter
+              brands={brands}
+              poolBrands={poolBrands}
+              setPoolBrands={setPoolBrands}
+              onChanged={() => { recentIds.current = new Set(); setPhase("voting"); }}
+            />
           )}
 
 
@@ -1154,6 +1182,109 @@ export default function App() {
         <div key={d.id} className={`delta ${d.cls}`} style={{ left: d.x, top: d.y }}>{d.val}</div>
       ))}
     </>
+  );
+}
+
+// ─── Brand Pool Filter ───────────────────────────────────────────────────────
+
+function BrandPoolFilter({ brands, poolBrands, setPoolBrands, onChanged }) {
+  const [query, setQuery]   = useState("");
+  const [open,  setOpen]    = useState(false);
+  const inputRef            = useRef(null);
+  const wrapRef             = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function onMouseDown(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return brands
+      .filter(([b]) => !poolBrands.has(b) && (!q || b.toLowerCase().includes(q)))
+      .slice(0, 50);
+  }, [brands, poolBrands, query]);
+
+  function add(brand) {
+    setPoolBrands((prev) => new Set([...prev, brand]));
+    setQuery("");
+    onChanged();
+    inputRef.current?.focus();
+  }
+
+  function remove(brand) {
+    setPoolBrands((prev) => { const n = new Set(prev); n.delete(brand); return n; });
+    onChanged();
+  }
+
+  function clearAll() {
+    setPoolBrands(new Set());
+    setQuery("");
+    onChanged();
+  }
+
+  const selectedList = [...poolBrands].sort();
+  const label = poolBrands.size === 0
+    ? "Brand Pool · votes count globally"
+    : `${poolBrands.size} brand${poolBrands.size > 1 ? "s" : ""} selected · votes count globally`;
+
+  return (
+    <div className="brand-section">
+      <div className="brand-label">{label}</div>
+
+      {/* Search input */}
+      <div className="bp-search-wrap" ref={wrapRef}>
+        <input
+          ref={inputRef}
+          className="bp-input"
+          placeholder="Search brands…"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && filtered.length > 0) add(filtered[0][0]);
+            if (e.key === "Escape") { setOpen(false); setQuery(""); }
+          }}
+        />
+        {(query || poolBrands.size > 0) && (
+          <button className="bp-clear" onClick={clearAll} title="Clear all">✕</button>
+        )}
+
+        {/* Dropdown */}
+        {open && (
+          <div className="bp-dropdown">
+            {filtered.length > 0 ? filtered.map(([brand, count]) => (
+              <div key={brand} className="bp-dropdown-item" onMouseDown={() => add(brand)}>
+                <span>{brand}</span>
+                <span className="bp-dropdown-item-count">{count}</span>
+              </div>
+            )) : (
+              <div className="bp-dropdown-empty">
+                {poolBrands.size > 0 && query === "" ? "All matching brands selected" : "No brands found"}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Selected brand pills (desktop only via CSS) */}
+      {selectedList.length > 0 ? (
+        <div className="bp-tags">
+          {selectedList.map((brand) => (
+            <div key={brand} className="bp-tag">
+              <span className="bp-tag-name">{brand}</span>
+              <button className="bp-tag-remove" onMouseDown={() => remove(brand)}>×</button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bp-all-msg">All brands included</div>
+      )}
+    </div>
   );
 }
 
