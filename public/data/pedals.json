@@ -7716,6 +7716,13 @@
 	},
 	{
 		"Brand": "Carl Martin",
+		"Name": "Red Repeat",
+		"Width": 3.74,
+		"Height": 4.88,
+		"Image": "carl-martin-red-repeat.png"
+	},
+	{
+		"Brand": "Carl Martin",
 		"Name": "Surf Trem",
 		"Width": 2.6,
 		"Height": 4.88,
@@ -11754,6 +11761,13 @@
 		"Image": "deathbyaudio-waveform-destroyer.png"
 	},
 	{
+		"Brand": "Decades",
+		"Name": "MultiJam",
+		"Width": 3.08,
+		"Height": 4.8,
+		"Image": "decades-multijam.png"
+	},
+	{
 		"Brand": "Decibelics",
 		"Name": "Angry Swede",
 		"Width": 2.06,
@@ -12833,6 +12847,13 @@
 	},
 	{
 		"Brand": "DOD",
+		"Name": "Compressor Sustainer FX80-B",
+		"Width": 3.35,
+		"Height": 5.13,
+		"Image": "dod-fx80b.png"
+	},
+	{
+		"Brand": "DOD",
 		"Name": "Chthonic Fuzz",
 		"Width": 2.88,
 		"Height": 4.68,
@@ -12973,6 +12994,13 @@
 	},
 	{
 		"Brand": "DOD",
+		"Name": "Stereo Turbo Chorus FX67",
+		"Width": 3.35,
+		"Height": 5.13,
+		"Image": "dod-fx67.png"
+	},
+	{
+		"Brand": "DOD",
 		"Name": "Super American Metal FX56",
 		"Width": 3.35,
 		"Height": 5.13,
@@ -12984,6 +13012,13 @@
 		"Width": 3.35,
 		"Height": 5.13,
 		"Image": "dod-fx56b.png"
+	},
+	{
+		"Brand": "DOD",
+		"Name": "Super Stereo Chorus FX68",
+		"Width": 3.35,
+		"Height": 5.13,
+		"Image": "dod-fx68.png"
 	},
 	{
 		"Brand": "DOD",
@@ -18223,6 +18258,13 @@
 	},
 	{
 		"Brand": "Fairfield Circuitry",
+		"Name": "Placeholder",
+		"Width": 4.7,
+		"Height": 3.84,
+		"Image": "fairfield-placeholder.png"
+	},
+	{
+		"Brand": "Fairfield Circuitry",
 		"Name": "Randy's Revenge",
 		"Width": 4.7,
 		"Height": 3.84,
@@ -22220,13 +22262,6 @@
 	},
 	{
 		"Brand": "Goodwood Audio",
-		"Name": "Trash Panda Quad",
-		"Width": 4.96,
-		"Height": 3.84,
-		"Image": "goodwood-trash-panda-quad.png"
-	},
-	{
-		"Brand": "Goodwood Audio",
 		"Name": "Wet Dry Wet Box",
 		"Width": 4.29,
 		"Height": 4.87,
@@ -25341,6 +25376,13 @@
 		"Image": "isp-deci-mate.png"
 	},
 	{
+		"Brand": "ISP Technologies",
+		"Name": "Hum Extractor + Decimator G",
+		"Width": 7.15,
+		"Height": 4.61,
+		"Image": "isp-hum-extractor-decimator-g.png"
+	},
+	{
 		"Brand": "J. Rockett",
 		"Name": ".45 Caliber",
 		"Width": 2.3,
@@ -26662,6 +26704,13 @@
 		"Width": 3.95,
 		"Height": 5.7,
 		"Image": "jhs-colour-box-v2.png"
+	},
+	{
+		"Brand": "JHS",
+		"Name": "Coyote",
+		"Width": 2.92,
+		"Height": 4.89,
+		"Image": "jhs-coyote.png"
 	},
 	{
 		"Brand": "JHS",
@@ -30116,6 +30165,13 @@
 	},
 	{
 		"Brand": "KMA",
+		"Name": "Stereo Headphone Amp",
+		"Width": 2.88,
+		"Height": 4.78,
+		"Image": "kma-audio-machines-stereo-headphone-amp.png"
+	},
+	{
+		"Brand": "KMA",
 		"Name": "Tyler",
 		"Width": 6,
 		"Height": 4.93,
@@ -31170,6 +31226,13 @@
 		"Width": 3.4375,
 		"Height": 8,
 		"Image": "line6-ex1.png"
+	},
+	{
+		"Brand": "Line 6",
+		"Name": "EX2",
+		"Width": 3.34,
+		"Height": 8.5,
+		"Image": "line6-ex2.png"
 	},
 	{
 		"Brand": "Line 6",
@@ -36171,6 +36234,13 @@
 	},
 	{
 		"Brand": "Mr. Black",
+		"Name": "BB-74x",
+		"Width": 2.72,
+		"Height": 4.5,
+		"Image": "mrblack-bb74x.png"
+	},
+	{
+		"Brand": "Mr. Black",
 		"Name": "BloodMoon",
 		"Width": 2.72,
 		"Height": 4.5,
@@ -36220,6 +36290,13 @@
 	},
 	{
 		"Brand": "Mr. Black",
+		"Name": "DoomStick II",
+		"Width": 2.72,
+		"Height": 4.5,
+		"Image": "mrblack-doomstick2.png"
+	},
+	{
+		"Brand": "Mr. Black",
 		"Name": "DoubleChorus",
 		"Width": 2.72,
 		"Height": 4.5,
@@ -36227,10 +36304,10 @@
 	},
 	{
 		"Brand": "Mr. Black",
-		"Name": "DoomStick II",
-		"Width": 2.72,
-		"Height": 4.5,
-		"Image": "mrblack-doomstick2.png"
+		"Name": "Doubletracker Stereo",
+		"Width": 3.98,
+		"Height": 4.7,
+		"Image": "mrblack-doubletracker-stereo.png"
 	},
 	{
 		"Brand": "Mr. Black",
@@ -36388,7 +36465,14 @@
 	},
 	{
 		"Brand": "Mr. Black",
-		"Name": "Stereo Vintage Ensemble",
+		"Name": "Sludge Master",
+		"Width": 2.72,
+		"Height": 4.5,
+		"Image": "mr-black-sludge-master.png"
+	},
+	{
+		"Brand": "Mr. Black",
+		"Name": "Vintage Ensemble Stereo",
 		"Width": 3.98,
 		"Height": 4.7,
 		"Image": "mrblack-stereovintageensemble.png"
@@ -38901,6 +38985,13 @@
 	},
 	{
 		"Brand": "Native Audio",
+		"Name": "Pattern Keeper",
+		"Width": 3.7,
+		"Height": 4.84,
+		"Image": "native-audio-pattern-keeper.png"
+	},
+	{
+		"Brand": "Native Audio",
 		"Name": "Pretty Bird Woman",
 		"Width": 2.6,
 		"Height": 5,
@@ -39192,6 +39283,13 @@
 		"Width": 5.7,
 		"Height": 4.89,
 		"Image": "normal-devices-delay-cascade.png"
+	},
+	{
+		"Brand": "Oats and Molasses",
+		"Name": "VB-2",
+		"Width": 2.6,
+		"Height": 5,
+		"Image": "oam-vb2.png"
 	},
 	{
 		"Brand": "O.C.E. Pedals",
@@ -41196,6 +41294,69 @@
 		"Image": "origin-sliderig-compact-deluxe-mk2.png"
 	},
 	{
+		"Brand": "Oscillator Devices",
+		"Name": "ABY",
+		"Width": 3.7,
+		"Height": 1.75,
+		"Image": "oscillator-devices-aby.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Garbage Collector Mini",
+		"Width": 1.62,
+		"Height": 2.37,
+		"Image": "oscillator-devices-garbage-collector-mini.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Garbage Collector V3",
+		"Width": 2.72,
+		"Height": 2.37,
+		"Image": "oscillator-devices-garbage-collector-v3.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Hydra4X",
+		"Width": 4.54,
+		"Height": 2.68,
+		"Image": "oscillator-devices-hydra4x.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Minerva",
+		"Width": 2.2,
+		"Height": 2.17,
+		"Image": "oscillator-devices-minerva.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Siren",
+		"Width": 2.63,
+		"Height": 4.5,
+		"Image": "oscillator-devices-siren.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Trash Panda Dual",
+		"Width": 2.18,
+		"Height": 3.94,
+		"Image": "oscillator-devices-trash-panda-dual.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Trash Panda Quad",
+		"Width": 5.22,
+		"Height": 4.12,
+		"Image": "oscillator-devices-trash-panda-quad.png"
+	},
+	{
+		"Brand": "Oscillator Devices",
+		"Name": "Volt",
+		"Width": 2.5,
+		"Height": 2.17,
+		"Image": "oscillator-devices-volt.png"
+	},
+	{
 		"Brand": "Oto Machines",
 		"Name": "Bam",
 		"Width": 5.71,
@@ -42653,6 +42814,13 @@
 	},
 	{
 		"Brand": "Pinstripe Pedals",
+		"Name": "DISO xo POLREV",
+		"Width": 5.07,
+		"Height": 2.84,
+		"Image": "pinstripepedals-diso-xo-polrev.png"
+	},
+	{
+		"Brand": "Pinstripe Pedals",
 		"Name": "MBFR",
 		"Width": 4.87,
 		"Height": 2.94,
@@ -43819,6 +43987,13 @@
 		"Width": 3.05,
 		"Height": 4.8,
 		"Image": "redpanda-particle2.png"
+	},
+	{
+		"Brand": "Red Panda",
+		"Name": "RD-1 Pitch Delay",
+		"Width": 2.87,
+		"Height": 4.5,
+		"Image": "redpanda-rd1-pitch-delay.png"
 	},
 	{
 		"Brand": "Red Panda",
@@ -47917,6 +48092,13 @@
 	},
 	{
 		"Brand": "Strymon",
+		"Name": "Cloudburst (LE Midnight)",
+		"Width": 2.7,
+		"Height": 4.43,
+		"Image": "strymon-cloudburst-midnight.png"
+	},
+	{
+		"Brand": "Strymon",
 		"Name": "Compadre",
 		"Width": 4,
 		"Height": 4.55,
@@ -48152,6 +48334,20 @@
 		"Width": 4.88,
 		"Height": 3.01,
 		"Image": "strymon-pch.png"
+	},
+	{
+		"Brand": "Strymon",
+		"Name": "PCH X1",
+		"Width": 1.98,
+		"Height": 3.73,
+		"Image": "strymon-pch-x1.png"
+	},
+	{
+		"Brand": "Strymon",
+		"Name": "PCH X2",
+		"Width": 4.2,
+		"Height": 3.73,
+		"Image": "strymon-pch-x2.png"
 	},
 	{
 		"Brand": "Strymon",
